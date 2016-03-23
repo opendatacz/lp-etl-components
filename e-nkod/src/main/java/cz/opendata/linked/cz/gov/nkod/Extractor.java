@@ -28,7 +28,7 @@ public class Extractor implements SequentialExecution {
     @DataProcessingUnit.OutputPort(id = "OutputRoky")
     public WritableFilesDataUnit outNkodRokyFiles;
 
-    @DataProcessingUnit.OutputPort(id = "Metadata")
+    @DataProcessingUnit.OutputPort(id = "XSLTParameters")
     public WritableSingleGraphDataUnit outRdfMetadata;
 
     @DataProcessingUnit.Configuration

@@ -130,7 +130,8 @@ public class Scraper_parser extends ScrapingTemplate{
 
                     File fs = nkod.createFile(fixIri(url.toString()));
                     FileUtils.writeStringToFile(fs, doc, "UTF-8");
-                    addXsltParameter(fixIri(url.toString()), "recordid", url.toString().replaceAll(".*rec\\.jsp\\?id=([^&]+)&.*", "$1"));
+                    if (fs.length() > 0) addXsltParameter(fixIri(url.toString()), "recordid", url.toString().replaceAll(".*rec\\.jsp\\?id=([^&]+)&.*", "$1"));
+                    else fs.delete();
 
                     break;
                 case "seznamrok-s":

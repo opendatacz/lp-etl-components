@@ -29,7 +29,7 @@ public class ExtractorTest {
             
             final WritableFilesDataUnit output = env.bindSystemDataUnit("OutputFiles", new File(TestUtils.getTempDirectory() + "/files/"));
             final WritableFilesDataUnit roky = env.bindSystemDataUnit("OutputRoky", new File(TestUtils.getTempDirectory() + "/roky/"));
-            final WritableSingleGraphDataUnit metadata = env.bindSingleGraphDataUnit("Metadata");
+            final WritableSingleGraphDataUnit metadata = env.bindSingleGraphDataUnit("XSLTParameters");
             //
             env.execute();
             TestUtils.store(metadata, new File("C://Tools//xsltmetadata.ttl"), RDFFormat.TURTLE);

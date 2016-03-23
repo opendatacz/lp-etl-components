@@ -73,7 +73,7 @@ public class ExtractorOntology {
                 "http://etl.linkedpipes.com/ontology/components/t-xslt/parameterName");
 
         XSLT_PARAM_VALUE_PREDICATE = valueFactory.createIRI(
-                "hhttp://etl.linkedpipes.com/ontology/components/t-xslt/parameterValue");
+                "http://etl.linkedpipes.com/ontology/components/t-xslt/parameterValue");
 
     }
 
