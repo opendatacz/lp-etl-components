@@ -1,0 +1,11 @@
+{
+    "@graph": [
+        {
+            "@id": "http://localhost/resources/configuration",
+            "@type" : ["http://data.gov.cz/resource/lp/etl/components/e-nkod/Configuration"],
+            "http://data.gov.cz/resource/lp/etl/components/e-nkod/rewriteCache": true,
+            "http://data.gov.cz/resource/lp/etl/components/e-nkod/timeout": 40000,
+            "http://data.gov.cz/resource/lp/etl/components/e-nkod/interval": 0
+        }
+    ]
+}

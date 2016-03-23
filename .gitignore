@@ -1,0 +1,24 @@
+*.prefs
+*.class
+
+# Eclipse Project Files #
+.project
+.settings
+.classpath
+
+# Netbeans files #
+nbactions.xml
+nb-configuration.xml
+
+# Build Directories #
+target/
+bin/
+
+# working dirs #
+user/
+working/
+global/
+/dpu-domain-specific/JavaApplication8/nbproject/private/
+/dpu-domain-specific/JavaApplication8/build/
+/dpu-domain-specific/test/dist/
+/dpu-domain-specific/intlib/testRestSQL/nbproject/private/
