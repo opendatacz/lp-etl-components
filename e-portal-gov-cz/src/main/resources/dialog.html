@@ -6,13 +6,15 @@
             <md-option value="97899">Rejstřík datových zdrojů</md-option>
         </md-select>
     </md-input-container>
+    <md-input-container class="md-block" flex-gt-sm>
+        <label>Registry number</label>
+        <input ng-model="dialog.registry" required>
+    </md-input-container>
     <div class="row">
 		<md-switch ng-model="dialog.rewriteCache" flex-gt-sm>Rewrite cache</md-switch>
 	</div>
-    <div class="row">
-        <md-input-container class="md-block" flex-gt-sm>
-            <label>Interval</label>
-            <input type="number" min="0" ng-model="dialog.interval" required>
-        </md-input-container>
-    </div>
+    <md-input-container class="md-block" flex-gt-sm>
+        <label>Interval</label>
+        <input type="number" min="0" ng-model="dialog.interval" required>
+    </md-input-container>
 </div>
