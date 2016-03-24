@@ -60,8 +60,10 @@ public class XMLYearListParser extends DefaultHandler {
             if (znepl.equals("false"))
             {
                 try {
-                    out.add(new ParseEntry(new URL(currentAdr), "detail-" + type, "xml"));
-                    out.add(new ParseEntry(new URL(currentVazby), "vazby-" + type, "xml"));
+                	if (!currentAdr.isEmpty()) out.add(new ParseEntry(new URL(currentAdr), "detail-" + type, "xml"));
+                    if (!currentVazby.isEmpty()) out.add(new ParseEntry(new URL(currentVazby), "vazby-" + type, "xml"));
+                    currentAdr = null;
+                    currentVazby = null;
                 } catch (MalformedURLException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
