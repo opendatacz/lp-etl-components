@@ -24,15 +24,18 @@ public class ExtractorTest {
     public void transformJsonLd() throws Exception {
         final Extractor dpu = new Extractor();
         dpu.config = new ExtractorConfig();
+        dpu.config.setRewriteCache(true);
+        dpu.config.setRegistry(97898);
+        dpu.config.setInterval(0);
 
         try (final TestEnvironment env = TestEnvironment.create(dpu, TestUtils.getTempDirectory())) {
             
-            final WritableFilesDataUnit output = env.bindSystemDataUnit("OutputFiles", new File(TestUtils.getTempDirectory() + "/files/"));
-            final WritableFilesDataUnit roky = env.bindSystemDataUnit("OutputRoky", new File(TestUtils.getTempDirectory() + "/roky/"));
+            final WritableFilesDataUnit output = env.bindSystemDataUnit("Files", new File(TestUtils.getTempDirectory() + "/files/"));
+            final WritableFilesDataUnit roky = env.bindSystemDataUnit("Indices", new File(TestUtils.getTempDirectory() + "/indices/"));
             final WritableSingleGraphDataUnit metadata = env.bindSingleGraphDataUnit("XSLTParameters");
             //
             env.execute();
-            TestUtils.store(metadata, new File("C://Tools//xsltmetadata.ttl"), RDFFormat.TURTLE);
+            TestUtils.store(metadata, new File("xsltmetadata.ttl"), RDFFormat.TURTLE);
         } catch (Exception ex) {
             LOG.error("Failure", ex);
         }

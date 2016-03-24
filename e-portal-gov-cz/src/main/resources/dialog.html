@@ -1,4 +1,11 @@
 <div class="container-flow">
+    <md-input-container class="md-block" flex-gt-sm>
+        <label>Registry</label>
+        <md-select ng-model="dialog.registry">
+            <md-option value="97898">Datové sady</md-option>
+            <md-option value="97899">Rejstøík datových zdrojù</md-option>
+        </md-select>
+    </md-input-container>
     <div class="row">
 		<md-switch ng-model="dialog.rewriteCache" flex-gt-sm>Rewrite cache</md-switch>
 	</div>

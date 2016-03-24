@@ -2,14 +2,17 @@ package cz.opendata.linked.cz.gov.nkod;
 
 import com.linkedpipes.etl.dpu.api.rdf.RdfToPojo;
 
-@RdfToPojo.Type(uri = "http://data.gov.cz/resource/lp/etl/components/e-nkod/Configuration")
+@RdfToPojo.Type(uri = "http://data.gov.cz/resource/lp/etl/components/e-portal-gov-cz/Configuration")
 public class ExtractorConfig  {
 
-    @RdfToPojo.Property(uri = "http://data.gov.cz/resource/lp/etl/components/e-nkod/rewriteCache")
+    @RdfToPojo.Property(uri = "http://data.gov.cz/resource/lp/etl/components/e-portal-gov-cz/rewriteCache")
 	private boolean rewriteCache;
     
-    @RdfToPojo.Property(uri = "http://data.gov.cz/resource/lp/etl/components/e-nkod/interval")
+    @RdfToPojo.Property(uri = "http://data.gov.cz/resource/lp/etl/components/e-portal-gov-cz/interval")
     private int interval;
+
+    @RdfToPojo.Property(uri = "http://data.gov.cz/resource/lp/etl/components/e-portal-gov-cz/registry")
+	private int registry;
 
     public ExtractorConfig() {
     	
@@ -30,5 +33,13 @@ public class ExtractorConfig  {
     public void setInterval(int interval) {
         this.interval = interval;
     }
+
+	public int getRegistry() {
+		return registry;
+	}
+
+	public void setRegistry(int registry) {
+		this.registry = registry;
+	}
 
 }

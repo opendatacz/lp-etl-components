@@ -22,11 +22,11 @@ public class Extractor implements SequentialExecution {
 
     private static final Logger LOG = LoggerFactory.getLogger(Extractor.class);
 
-    @DataProcessingUnit.OutputPort(id = "OutputFiles")
-    public WritableFilesDataUnit outNkodFiles;
+    @DataProcessingUnit.OutputPort(id = "Files")
+    public WritableFilesDataUnit outFiles;
 
-    @DataProcessingUnit.OutputPort(id = "OutputRoky")
-    public WritableFilesDataUnit outNkodRokyFiles;
+    @DataProcessingUnit.OutputPort(id = "Indices")
+    public WritableFilesDataUnit outIndexFiles;
 
     @DataProcessingUnit.OutputPort(id = "XSLTParameters")
     public WritableSingleGraphDataUnit outRdfMetadata;
@@ -43,8 +43,8 @@ public class Extractor implements SequentialExecution {
         Scraper_parser s = new Scraper_parser();
         s.logger = LOG;
         s.context = context;
-        s.nkod = outNkodFiles;
-        s.nkod_roky = outNkodRokyFiles;
+        s.record = outFiles;
+        s.indices = outIndexFiles;
         s.metadata = outRdfMetadata;
 
         java.util.Date date = new java.util.Date();
@@ -52,11 +52,11 @@ public class Extractor implements SequentialExecution {
 
         //Download
         try {
-            URL init_nkod = new URL("http://portal.gov.cz/portal/rejstriky/data/97898/index.xml");
+            URL init_nkod = new URL("http://portal.gov.cz/portal/rejstriky/data/" + config.getRegistry() + "/index.xml");
 
             if (config.isRewriteCache()) {
                 Path path_nkod = Paths.get(
-                        context.getWorkingDirectory() + "/cache/portal.gov.cz/portal/rejstriky/data/97898/index.xml");
+                        context.getWorkingDirectory() + "/cache/portal.gov.cz/portal/rejstriky/data/" + config.getRegistry() + "/index.xml");
                 LOG.info("Deleting " + path_nkod);
                 Files.deleteIfExists(path_nkod);
             }
@@ -78,7 +78,7 @@ public class Extractor implements SequentialExecution {
         java.util.Date date2 = new java.util.Date();
         long end = date2.getTime();
 
-        LOG.info("Processed " + s.numNkod + " nkod from " + s.numNkodRoks + " years.");
+        LOG.info("Processed " + s.numRecords + " from " + s.numIndices + " indices.");
         LOG.info("Processed in " + (end - start) + "ms");
 
     }

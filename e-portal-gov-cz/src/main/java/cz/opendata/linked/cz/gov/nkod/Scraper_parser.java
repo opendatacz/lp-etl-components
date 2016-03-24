@@ -38,11 +38,11 @@ public class Scraper_parser extends ScrapingTemplate{
     
     private static final Logger LOG = LoggerFactory.getLogger(Scraper_parser.class);
 
-    public WritableFilesDataUnit nkod, nkod_roky;
-    public int numNkod = 0;
-    public int numNkodRoks = 0;
-    public int currentNkod = 0;
-    public int currentNkodRoks = 0;
+    public WritableFilesDataUnit record, indices;
+    public int numRecords = 0;
+    public int numIndices = 0;
+    public int currentRecord = 0;
+    public int currentIndex = 0;
     
     public WritableSingleGraphDataUnit metadata;
 
@@ -72,8 +72,8 @@ public class Scraper_parser extends ScrapingTemplate{
                 
                 switch (type) {
                     case "s":
-                        numNkodRoks = out.size();
-                        logger.info("Got " + numNkodRoks + " links to yearly lists of \"Nkod\".");
+                        numIndices = out.size();
+                        logger.debug("Got " + numIndices + " links to indices.");
                         break;
                 }
             } catch (IOException e1) {
@@ -104,8 +104,8 @@ public class Scraper_parser extends ScrapingTemplate{
                 int newlinks = out.size();
                 switch (type) {
                 case "s":
-                    numNkod += newlinks;
-                    logger.info("Got " + newlinks + " new links to \"Nkod\", " + numNkod + " total" );
+                    numRecords += newlinks;
+                    logger.debug("Got " + newlinks + " new links to records, " + numRecords + " total" );
                     break;
             }
                 
@@ -126,18 +126,18 @@ public class Scraper_parser extends ScrapingTemplate{
         try {
             switch (docType) {
                 case "detail-s":
-                    logger.debug("Processing dataset " + ++currentNkod + "/" + numNkod + ": " + url.toString());
+                    logger.debug("Processing record " + ++currentRecord + "/" + numRecords + ": " + url.toString());
 
-                    File fs = nkod.createFile(fixIri(url.toString()));
+                    File fs = record.createFile(fixIri(url.toString()));
                     FileUtils.writeStringToFile(fs, doc, "UTF-8");
                     if (fs.length() > 0) addXsltParameter(fixIri(url.toString()), "recordid", url.toString().replaceAll(".*rec\\.jsp\\?id=([^&]+)&.*", "$1"));
                     else fs.delete();
 
                     break;
                 case "seznamrok-s":
-                    logger.debug("Processing yearly list of datasets " + ++currentNkodRoks + "/" + numNkodRoks + ": " + url.toString());
+                    logger.debug("Processing indices of records " + ++currentIndex + "/" + numIndices + ": " + url.toString());
 
-                    File fss = nkod_roky.createFile(fixIri(url.toString()));
+                    File fss = indices.createFile(fixIri(url.toString()));
                     FileUtils.writeStringToFile(fss, doc, "UTF-8");
 
                     break;
@@ -150,7 +150,7 @@ public class Scraper_parser extends ScrapingTemplate{
     }
 
 protected void addXsltParameter(String fileName, String key, String value) {
-        LOG.info("addXsltParameter: {} {} {}", fileName, key, value);
+        LOG.debug("addXsltParameter: {} {} {}", fileName, key, value);
         final ValueFactory valueFactory = SimpleValueFactory.getInstance();
 
         // Configuration class.

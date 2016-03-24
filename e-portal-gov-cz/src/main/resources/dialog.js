@@ -3,10 +3,11 @@ define([], function () {
 
         $scope.dialog = {
             'rewriteCache': '',
-            'interval': ''
+            'interval': '',
+            'registry': ''
         };
 
-        var rdf = rdfService.create('http://data.gov.cz/resource/lp/etl/components/e-nkod/');
+        var rdf = rdfService.create('http://data.gov.cz/resource/lp/etl/components/e-portal-gov-cz/');
 
         $scope.setConfiguration = function (inConfig) {
             rdf.setData(inConfig);
@@ -14,6 +15,7 @@ define([], function () {
 
             $scope.dialog.rewriteCache = rdf.getBoolean(resource, 'rewriteCache');
             $scope.dialog.interval = rdf.getInteger(resource, 'interval');
+            $scope.dialog.registry = rdf.getInteger(resource, 'registry');
         };
 
         $scope.getConfiguration = function () {
@@ -21,6 +23,7 @@ define([], function () {
 
             rdf.setBoolean(resource, 'rewriteCache', $scope.dialog.rewriteCache);
             rdf.setInteger(resource, 'interval', $scope.dialog.interval);
+            rdf.setInteger(resource, 'registry', $scope.dialog.registry);
 
             return rdf.getData();
         };

@@ -8,11 +8,11 @@
         <version>0.0.0</version>
     </parent>
     <groupId>com.linkedpipes</groupId>
-    <artifactId>e-nkod</artifactId>
-    <name>NKOD extractor</name>
+    <artifactId>e-portal-gov-cz</artifactId>
+    <name>Portal.gov.cz extractor</name>
     <packaging>bundle</packaging>
     <version>0.0.0</version>
-    <description>This extractor scrapes Czech National Open Data Catalog entries from portal.gov.cz</description>
+    <description>This extractor scrapes data from portal.gov.cz registry.</description>
 
     <dependencies>
         <dependency>
