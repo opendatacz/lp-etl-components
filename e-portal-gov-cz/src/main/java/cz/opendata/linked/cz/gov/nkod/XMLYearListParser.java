@@ -13,8 +13,10 @@ import cz.cuni.mff.xrg.scraper.lib.template.ParseEntry;
 public class XMLYearListParser extends DefaultHandler {
     private String type;
     private boolean addr = false;
+    private boolean vazby = false;
     private boolean zneplatneno = false;
     private String currentAdr;
+    private String currentVazby;
     private StringBuilder sb;
     private LinkedList<ParseEntry> out;
     
@@ -31,6 +33,10 @@ public class XMLYearListParser extends DefaultHandler {
             addr = true;
             sb = new StringBuilder();
         }
+        else if (qName.equals("VazbyURL")) {
+        	vazby = true;
+        	sb = new StringBuilder();
+        }
         else if (qName.equals("Zneplatneny")) {
             sb = new StringBuilder();
             zneplatneno = true;
@@ -44,6 +50,10 @@ public class XMLYearListParser extends DefaultHandler {
             addr = false;
             currentAdr = sb.toString();
         }
+        else if (qName.equals("VazbyURL")) {
+        	vazby = false;
+        	currentVazby = sb.toString();
+        }
         else if (qName.equals("Zneplatneny")) {
             zneplatneno = false;
             String znepl = sb.toString();
@@ -51,6 +61,7 @@ public class XMLYearListParser extends DefaultHandler {
             {
                 try {
                     out.add(new ParseEntry(new URL(currentAdr), "detail-" + type, "xml"));
+                    out.add(new ParseEntry(new URL(currentVazby), "vazby-" + type, "xml"));
                 } catch (MalformedURLException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
@@ -62,7 +73,7 @@ public class XMLYearListParser extends DefaultHandler {
     @Override
     public void characters(char[] ch, int start, int length) throws SAXException {
         //System.out.println("Chars: " + new String(ch, start, length));
-        if (addr) {
+        if (addr || vazby) {
             sb.append(new String(ch, start, length));
         }
         if (zneplatneno) {

@@ -38,11 +38,13 @@ public class Scraper_parser extends ScrapingTemplate{
     
     private static final Logger LOG = LoggerFactory.getLogger(Scraper_parser.class);
 
-    public WritableFilesDataUnit record, indices;
+    public WritableFilesDataUnit record, indices, relations;
     public int numRecords = 0;
     public int numIndices = 0;
+    public int numRelations = 0;
     public int currentRecord = 0;
     public int currentIndex = 0;
+    public int currentRelation = 0;
     
     public WritableSingleGraphDataUnit metadata;
 
@@ -105,7 +107,9 @@ public class Scraper_parser extends ScrapingTemplate{
                 switch (type) {
                 case "s":
                     numRecords += newlinks;
+                    numRelations += newlinks;
                     logger.debug("Got " + newlinks + " new links to records, " + numRecords + " total" );
+                    logger.debug("Got " + newlinks + " new links to relations, " + numRelations + " total" );
                     break;
             }
                 
@@ -139,6 +143,14 @@ public class Scraper_parser extends ScrapingTemplate{
 
                     File fss = indices.createFile(fixIri(url.toString()));
                     FileUtils.writeStringToFile(fss, doc, "UTF-8");
+
+                    break;
+                case "vazby-s":
+                    logger.debug("Processing relations " + ++currentRelation + "/" + numRelations + ": " + url.toString());
+
+                    File fsv = relations.createFile(fixIri(url.toString()));
+                    FileUtils.writeStringToFile(fsv, doc, "UTF-8");
+                    if (fsv.length() == 0) fsv.delete();
 
                     break;
             }

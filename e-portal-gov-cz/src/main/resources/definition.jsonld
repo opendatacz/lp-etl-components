@@ -10,6 +10,7 @@
             "http://linkedpipes.com/ontology/port": [
                 {"@id": "http://localhost:8080/resources/components/e-portal-gov-cz/0.0.0/xsltParameters"},
                 {"@id": "http://localhost:8080/resources/components/e-portal-gov-cz/0.0.0/indices"},
+                {"@id": "http://localhost:8080/resources/components/e-portal-gov-cz/0.0.0/relations"},
                 {"@id": "http://localhost:8080/resources/components/e-portal-gov-cz/0.0.0/files"}                
             ],
             "http://linkedpipes.com/ontology/keyword": [
@@ -35,6 +36,17 @@
                 "http://linkedpipes.com/ontology/Output"
             ],
             "http://linkedpipes.com/ontology/binding": "Indices",
+            "http://linkedpipes.com/ontology/requirement": [ {"@id": "http://linkedpipes.com/resources/requirement/workingDirectory"} ]
+        },
+        {
+            "@id": "http://localhost:8080/resources/components/e-portal-gov-cz/0.0.0/relations",
+            "http://www.w3.org/2004/02/skos/core#prefLabel": "Relations",
+            "@type": [
+                "http://linkedpipes.com/ontology/dataUnit/system/1.0/files/DirectoryMirror",
+                "http://linkedpipes.com/ontology/Port",
+                "http://linkedpipes.com/ontology/Output"
+            ],
+            "http://linkedpipes.com/ontology/binding": "Relations",
             "http://linkedpipes.com/ontology/requirement": [ {"@id": "http://linkedpipes.com/resources/requirement/workingDirectory"} ]
         },
         {

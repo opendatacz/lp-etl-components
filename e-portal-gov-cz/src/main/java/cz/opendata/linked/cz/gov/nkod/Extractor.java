@@ -28,6 +28,9 @@ public class Extractor implements SequentialExecution {
     @DataProcessingUnit.OutputPort(id = "Indices")
     public WritableFilesDataUnit outIndexFiles;
 
+    @DataProcessingUnit.OutputPort(id = "Relations")
+    public WritableFilesDataUnit outRelationFiles;
+
     @DataProcessingUnit.OutputPort(id = "XSLTParameters")
     public WritableSingleGraphDataUnit outRdfMetadata;
 
@@ -46,6 +49,7 @@ public class Extractor implements SequentialExecution {
         s.record = outFiles;
         s.indices = outIndexFiles;
         s.metadata = outRdfMetadata;
+        s.relations = outRelationFiles;
 
         java.util.Date date = new java.util.Date();
         long start = date.getTime();

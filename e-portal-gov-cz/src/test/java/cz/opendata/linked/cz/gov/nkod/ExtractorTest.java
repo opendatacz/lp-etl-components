@@ -32,6 +32,7 @@ public class ExtractorTest {
             
             final WritableFilesDataUnit output = env.bindSystemDataUnit("Files", new File(TestUtils.getTempDirectory() + "/files/"));
             final WritableFilesDataUnit roky = env.bindSystemDataUnit("Indices", new File(TestUtils.getTempDirectory() + "/indices/"));
+            final WritableFilesDataUnit vazby = env.bindSystemDataUnit("Relations", new File(TestUtils.getTempDirectory() + "/relations/"));
             final WritableSingleGraphDataUnit metadata = env.bindSingleGraphDataUnit("XSLTParameters");
             //
             env.execute();
