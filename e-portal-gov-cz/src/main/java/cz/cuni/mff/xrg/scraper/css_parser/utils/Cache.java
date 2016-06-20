@@ -25,13 +25,7 @@ public class Cache {
 
         oURL = new URL(p_sURL);
         oURL.openConnection();
-        try    {
-            sResponse = IOUtils.toString(oURL, "UTF-8");
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
+        sResponse = IOUtils.toString(oURL, "UTF-8");
 
         return sResponse;
     }

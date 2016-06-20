@@ -7,8 +7,8 @@ import org.openrdf.rio.RDFFormat;
 
 import com.linkedpipes.etl.dataunit.sesame.api.rdf.WritableSingleGraphDataUnit;
 import com.linkedpipes.etl.dataunit.system.api.files.WritableFilesDataUnit;
-import com.linkedpipes.etl.dpu.test.TestEnvironment;
-import com.linkedpipes.etl.dpu.test.TestUtils;
+import com.linkedpipes.etl.component.test.TestEnvironment;
+import com.linkedpipes.etl.component.test.TestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +25,7 @@ public class ExtractorTest {
         final Extractor dpu = new Extractor();
         dpu.config = new ExtractorConfig();
         dpu.config.setRewriteCache(true);
-        dpu.config.setRegistry(97898);
+        dpu.config.setRegistry(97899);
         dpu.config.setInterval(0);
 
         try (final TestEnvironment env = TestEnvironment.create(dpu, TestUtils.getTempDirectory())) {

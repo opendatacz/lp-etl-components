@@ -1,6 +1,6 @@
 package cz.opendata.linked.cz.gov.nkod;
 
-import com.linkedpipes.etl.dpu.api.rdf.RdfToPojo;
+import com.linkedpipes.etl.component.api.service.RdfToPojo;
 
 @RdfToPojo.Type(uri = "http://data.gov.cz/resource/lp/etl/components/e-portal-gov-cz/Configuration")
 public class ExtractorConfig  {

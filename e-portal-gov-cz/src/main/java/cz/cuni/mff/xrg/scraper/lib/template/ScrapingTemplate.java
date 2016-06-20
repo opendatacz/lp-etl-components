@@ -14,7 +14,8 @@ import java.util.LinkedList;
 
 import org.slf4j.Logger;
 
-import com.linkedpipes.etl.dpu.api.DataProcessingUnit;
+import com.linkedpipes.etl.component.api.Component;
+
 
 /**
  * Abstract class of common scraper.
@@ -29,7 +30,6 @@ import com.linkedpipes.etl.dpu.api.DataProcessingUnit;
  */
 public abstract class ScrapingTemplate {
     
-    public DataProcessingUnit.Context context;
     public Logger logger;
     
     /** 
@@ -61,7 +61,7 @@ public abstract class ScrapingTemplate {
         HashSet<ParseEntry> parsed = new HashSet<>();
         toParse.add(new ParseEntry(initUrl, type, "xml"));
         
-        while (!toParse.isEmpty() && !context.canceled()) {
+        while (!toParse.isEmpty()) {
             try {
                 ParseEntry p = toParse.pop();
                 // skip if parsed
@@ -79,7 +79,6 @@ public abstract class ScrapingTemplate {
                 logger.error(ex.getLocalizedMessage());
             } 
         }
-        if (context.canceled()) logger.info("Cancelled");
         
     }
     

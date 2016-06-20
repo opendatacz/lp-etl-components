@@ -11,41 +11,43 @@ import org.slf4j.LoggerFactory;
 
 import com.linkedpipes.etl.dataunit.sesame.api.rdf.WritableSingleGraphDataUnit;
 import com.linkedpipes.etl.dataunit.system.api.files.WritableFilesDataUnit;
-import com.linkedpipes.etl.dpu.api.DataProcessingUnit;
-import com.linkedpipes.etl.dpu.api.executable.SequentialExecution;
-import com.linkedpipes.etl.executor.api.v1.exception.NonRecoverableException;
+import com.linkedpipes.etl.component.api.Component;
+import com.linkedpipes.etl.component.api.Component.Sequential;
+import com.linkedpipes.etl.component.api.service.WorkingDirectory;
 
 import cz.cuni.mff.xrg.scraper.css_parser.utils.BannedException;
 import cz.cuni.mff.xrg.scraper.css_parser.utils.Cache;
 
-public class Extractor implements SequentialExecution {
+public class Extractor implements Sequential {
 
     private static final Logger LOG = LoggerFactory.getLogger(Extractor.class);
 
-    @DataProcessingUnit.OutputPort(id = "Files")
+    @Component.OutputPort(id = "Files")
     public WritableFilesDataUnit outFiles;
 
-    @DataProcessingUnit.OutputPort(id = "Indices")
+    @Component.OutputPort(id = "Indices")
     public WritableFilesDataUnit outIndexFiles;
 
-    @DataProcessingUnit.OutputPort(id = "Relations")
+    @Component.OutputPort(id = "Relations")
     public WritableFilesDataUnit outRelationFiles;
 
-    @DataProcessingUnit.OutputPort(id = "XSLTParameters")
+    @Component.OutputPort(id = "XSLTParameters")
     public WritableSingleGraphDataUnit outRdfMetadata;
 
-    @DataProcessingUnit.Configuration
+    @Component.Configuration
     public ExtractorConfig config;
     
+    @Component.Inject
+    public WorkingDirectory wd;
+    
     @Override
-    public void execute(DataProcessingUnit.Context context) throws NonRecoverableException {
+    public void execute() {
         Cache.setInterval(config.getInterval());
-        Cache.setBaseDir(context.getWorkingDirectory() + "/cache/");
+        Cache.setBaseDir(wd + "/cache/");
         Cache.logger = LOG;
         Cache.rewriteCache = config.isRewriteCache();
         Scraper_parser s = new Scraper_parser();
         s.logger = LOG;
-        s.context = context;
         s.record = outFiles;
         s.indices = outIndexFiles;
         s.metadata = outRdfMetadata;
@@ -60,7 +62,7 @@ public class Extractor implements SequentialExecution {
 
             if (config.isRewriteCache()) {
                 Path path_nkod = Paths.get(
-                        context.getWorkingDirectory() + "/cache/portal.gov.cz/portal/rejstriky/data/" + config.getRegistry() + "/index.xml");
+                        wd + "/cache/portal.gov.cz/portal/rejstriky/data/" + config.getRegistry() + "/index.xml");
                 LOG.info("Deleting " + path_nkod);
                 Files.deleteIfExists(path_nkod);
             }

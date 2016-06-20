@@ -132,7 +132,7 @@ public class Scraper_parser extends ScrapingTemplate{
                 case "detail-s":
                     logger.debug("Processing record " + ++currentRecord + "/" + numRecords + ": " + url.toString());
 
-                    File fs = record.createFile(fixIri(url.toString()));
+                    File fs = record.createFile(fixIri(url.toString())).toFile();
                     FileUtils.writeStringToFile(fs, doc, "UTF-8");
                     if (fs.length() > 0) addXsltParameter(fixIri(url.toString()), "recordid", url.toString().replaceAll(".*rec\\.jsp\\?id=([^&]+)&.*", "$1"));
                     else fs.delete();
@@ -141,14 +141,14 @@ public class Scraper_parser extends ScrapingTemplate{
                 case "seznamrok-s":
                     logger.debug("Processing indices of records " + ++currentIndex + "/" + numIndices + ": " + url.toString());
 
-                    File fss = indices.createFile(fixIri(url.toString()));
+                    File fss = indices.createFile(fixIri(url.toString())).toFile();
                     FileUtils.writeStringToFile(fss, doc, "UTF-8");
 
                     break;
                 case "vazby-s":
                     logger.debug("Processing relations " + ++currentRelation + "/" + numRelations + ": " + url.toString());
 
-                    File fsv = relations.createFile(fixIri(url.toString()));
+                    File fsv = relations.createFile(fixIri(url.toString())).toFile();
                     FileUtils.writeStringToFile(fsv, doc, "UTF-8");
                     if (fsv.length() == 0) fsv.delete();
 
