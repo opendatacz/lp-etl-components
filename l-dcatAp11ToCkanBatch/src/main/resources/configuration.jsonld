@@ -1,0 +1,11 @@
+{
+    "@graph": [
+        {
+            "@id": "http://localhost/resources/configuration",
+            "@type" : ["http://plugins.linkedpipes.com/ontology/l-dcatAp11ToCkanBatch#Configuration"],
+            "http://plugins.linkedpipes.com/ontology/l-dcatAp11ToCkanBatch#apiUri": "",
+            "http://plugins.linkedpipes.com/ontology/l-dcatAp11ToCkanBatch#apiKey" : "",
+            "http://plugins.linkedpipes.com/ontology/l-dcatAp11ToCkan#loadLanguage" : "en"
+        }
+    ]
+}
