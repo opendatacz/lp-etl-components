@@ -320,7 +320,9 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
             for (String keyword : keywords) {
                 String safekeyword = keyword.replace(",","")
                         .replace(".","")
-                        .replace("/","")
+                        .replace("/","-")
+                        .replace(":","-")
+                        .replace(";","-")
                         .replace("§", "paragraf");
                 if (safekeyword.length() < 2) {
                     continue;
