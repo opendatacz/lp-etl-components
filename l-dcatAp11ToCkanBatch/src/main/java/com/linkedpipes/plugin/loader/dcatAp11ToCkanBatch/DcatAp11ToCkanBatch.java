@@ -340,7 +340,7 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
                 root.put("metadata_modified", modified);
             }
 
-            if (configuration.getProfile() == DcatAp11ToCkanBatchVocabulary.PROFILES_NKOD.stringValue()) {
+            if (configuration.getProfile().equals(DcatAp11ToCkanBatchVocabulary.PROFILES_NKOD.stringValue())) {
                 if (!publisher_uri.isEmpty()) {
                     root.put("publisher_uri", publisher_uri);
                 }
@@ -437,7 +437,7 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
                     distro.put("last_modified", dmodified);
                 }
 
-                if (configuration.getProfile() == DcatAp11ToCkanBatchVocabulary.PROFILES_NKOD.stringValue()) {
+                if (configuration.getProfile().equals(DcatAp11ToCkanBatchVocabulary.PROFILES_NKOD.stringValue())) {
                     String dtemporalStart = executeSimpleSelectQuery("SELECT ?temporalStart WHERE {<" + distribution + "> <"+ DCTERMS.TEMPORAL + ">/<" + DcatAp11ToCkanBatchVocabulary.SCHEMA_STARTDATE + "> ?temporalStart }", "temporalStart");
                     if (!dtemporalStart.isEmpty()) {
                         distro.put("temporal_start", dtemporalStart);
@@ -527,7 +527,7 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
             HttpPost httpPost = new HttpPost(apiURI + "/package_update?id=" + datasetID);
             httpPost.addHeader(new BasicHeader("Authorization", configuration.getApiKey()));
 
-            //LOG.debug(json);
+            LOG.debug(json);
 
             httpPost.setEntity(new StringEntity(json, Charset.forName("utf-8")));
             CloseableHttpResponse response = null;
