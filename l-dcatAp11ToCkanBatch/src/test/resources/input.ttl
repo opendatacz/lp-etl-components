@@ -35,6 +35,26 @@
 	<http://www.w3.org/ns/dqv#hasQualityAnnotation> <http://qann1.cz> , <http://qann2.cz> ;
 	<http://www.w3.org/ns/dcat#distribution> <http://real.dataset.iri/distribution> .
 
+<http://real.dataset.iri/2> a <http://www.w3.org/ns/dcat#Dataset> ;
+    ckan:datasetID "test100";
+	<http://data.europa.eu/(xyz)/statdcat-ap/attribute> <http://att1.cz> , <http://att2.cz> ;
+	<http://data.europa.eu/(xyz)/statdcat-ap/dimension> <http://dim1.cz> , <http://dim2.cz> ;
+	<http://data.europa.eu/(xyz)/statdcat-ap/numSeries> 9 ;
+	<http://data.europa.eu/(xyz)/statdcat-ap/statMeasure> <http://inch.cz> , <http://km.cz> ;
+	<http://purl.org/dc/terms/accrualPeriodicity> <http://publications.europa.eu/resource/authority/frequency/ANNUAL_3> ;
+	<http://purl.org/dc/terms/conformsTo> <http://test.iri> ;
+	<http://purl.org/dc/terms/description> "Dataset description"@en ;
+	<http://purl.org/dc/terms/issued> "2016-07-12"^^<http://www.w3.org/2001/XMLSchema#date> ;
+	<http://purl.org/dc/terms/language> <http://publications.europa.eu/resource/authority/language/ENG> ;
+	<http://purl.org/dc/terms/modified> "2016-07-25"^^<http://www.w3.org/2001/XMLSchema#date> ;
+	<http://purl.org/dc/terms/publisher> <https://cssz.cz> ;
+	<http://purl.org/dc/terms/title> "Dataset title"@en ;
+	<http://www.w3.org/ns/dcat#contactPoint> <http://real.dataset.iri/contactPoint> ;
+	<http://www.w3.org/ns/dcat#keyword> "data"@en , "open"@en ;
+	<http://www.w3.org/ns/dcat#theme> <http://publications.europa.eu/resource/authority/data-theme/TECH> ;
+	<http://www.w3.org/ns/dqv#hasQualityAnnotation> <http://qann1.cz> , <http://qann2.cz> ;
+	<http://www.w3.org/ns/dcat#distribution> <http://real.dataset.iri/distribution> .
+
 <http://publications.europa.eu/resource/authority/frequency/ANNUAL_3> a <http://purl.org/dc/terms/Frequency> .
 
 <http://publications.europa.eu/resource/authority/language/ENG> a <http://purl.org/dc/terms/LinguisticSystem> .

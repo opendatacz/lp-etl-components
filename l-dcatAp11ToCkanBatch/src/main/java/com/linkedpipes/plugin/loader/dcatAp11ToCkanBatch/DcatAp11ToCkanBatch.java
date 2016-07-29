@@ -62,25 +62,29 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
     @Component.Inject
     public ProgressReport progressReport;
 
-    @Override
-    public void execute() throws LpException {
-        String apiURI = configuration.getApiUri();
+    CloseableHttpClient queryClient = HttpClientBuilder.create().setRedirectStrategy(new LaxRedirectStrategy()).build();
+    CloseableHttpClient createClient = HttpClientBuilder.create().setRedirectStrategy(new LaxRedirectStrategy()).build();
+    CloseableHttpClient postClient = HttpClients.createDefault();
 
-        if (apiURI == null || apiURI.isEmpty() || configuration.getApiKey() == null || configuration.getApiKey().isEmpty() ) {
-            throw exceptionFactory.failed("Missing required settings.");
-        }
+    String apiURI;
+
+    String fixKeyword(String keyword) {
+        return keyword.replace(",","")
+                .replace(".","")
+                .replace("/","-")
+                .replace(":","-")
+                .replace(";","-")
+                .replace("§", "paragraf");
+    }
+
+    Map<String, String> getOrganizations() {
+        CloseableHttpResponse queryResponse = null;
+        List<String> organizationList = new LinkedList<>();
+        Map<String, String> organizations = new HashMap<>();
+        HttpGet httpGetOrg = new HttpGet(apiURI + "/organization_list");
 
         LOG.debug("Querying CKAN for organizations");
 
-        Map<String, String> organizations = new HashMap<>();
-        List<String> organizationList = new LinkedList<>();
-
-        CloseableHttpClient queryClient = HttpClientBuilder.create().setRedirectStrategy(new LaxRedirectStrategy()).build();
-        CloseableHttpClient createClient = HttpClientBuilder.create().setRedirectStrategy(new LaxRedirectStrategy()).build();
-        CloseableHttpClient postClient = HttpClients.createDefault();
-        CloseableHttpResponse queryResponse = null;
-
-        HttpGet httpGetOrg = new HttpGet(apiURI + "/organization_list");
         try {
             queryResponse = queryClient.execute(httpGetOrg);
             if (queryResponse.getStatusLine().getStatusCode() == 200) {
@@ -94,13 +98,7 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
                 String ent = EntityUtils.toString(queryResponse.getEntity());
                 LOG.info("Organizations not downloaded: " + ent);
             }
-        } catch (ClientProtocolException e) {
-            LOG.error(e.getLocalizedMessage(), e);
-        } catch (IOException e) {
-            LOG.error(e.getLocalizedMessage(), e);
-        } catch (ParseException e) {
-            LOG.error(e.getLocalizedMessage(), e);
-        } catch (JSONException e) {
+        } catch (Exception e) {
             LOG.error(e.getLocalizedMessage(), e);
         } finally {
             if (queryResponse != null) {
@@ -120,6 +118,7 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
                 queryResponse = queryClient.execute(httpGetOrgDetail);
                 if (queryResponse.getStatusLine().getStatusCode() == 200) {
                     LOG.info("Organization " + organization + " downloaded");
+
                     JSONObject response = new JSONObject(EntityUtils.toString(queryResponse.getEntity())).getJSONObject("result");
                     JSONArray org_extras = response.getJSONArray("extras");
                     for (Object extra : org_extras) {
@@ -134,13 +133,7 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
                     String ent = EntityUtils.toString(queryResponse.getEntity());
                     LOG.info("Organization " + organization + " not downloaded: " + ent);
                 }
-            } catch (ClientProtocolException e) {
-                LOG.error(e.getLocalizedMessage(), e);
-            } catch (IOException e) {
-                LOG.error(e.getLocalizedMessage(), e);
-            } catch (ParseException e) {
-                LOG.error(e.getLocalizedMessage(), e);
-            } catch (JSONException e) {
+            } catch (Exception e) {
                 LOG.error(e.getLocalizedMessage(), e);
             } finally {
                 if (queryResponse != null) {
@@ -153,7 +146,20 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
             }
         }
 
-        // Load files.
+        return organizations;
+    }
+
+    @Override
+    public void execute() throws LpException {
+
+        apiURI = configuration.getApiUri();
+
+        if (apiURI == null || apiURI.isEmpty() || configuration.getApiKey() == null || configuration.getApiKey().isEmpty() ) {
+            throw exceptionFactory.failed("Missing required settings.");
+        }
+
+        Map<String, String> organizations = getOrganizations();
+
         LOG.debug("Querying metadata for datasets");
 
         LinkedList<String> datasets = new LinkedList<>();
@@ -164,13 +170,17 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
         int current = 0;
         int total = datasets.size();
 
+        LOG.info("Found " + total + " datasets");
+
         JSONArray outArray = new JSONArray();
 
-        LOG.info("Found " + total + " datasets");
         progressReport.start(total);
 
         for (String datasetURI : datasets) {
             current++;
+
+            CloseableHttpResponse queryResponse = null;
+
             LOG.info("Processing dataset " + current + "/" + total + ": " + datasetURI);
 
             String datasetID = executeSimpleSelectQuery("SELECT ?did WHERE {<" + datasetURI + "> <"+ DcatAp11ToCkanBatchVocabulary.LODCZCKAN_DATASET_ID + "> ?did }", "did");
@@ -193,12 +203,7 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
                 keywords.add(map.get("keyword").stringValue());
             }
 
-            LinkedList<String> distributions = new LinkedList<>();
-            for (Map<String, Value> map : executeSelectQuery("SELECT ?distribution WHERE {<" + datasetURI + "> <" + DcatAp11ToCkanBatchVocabulary.DCAT_DISTRIBUTION + "> ?distribution }")) {
-                distributions.add(map.get("distribution").stringValue());
-            }
-
-            boolean exists = false;
+            boolean datasetExists = false;
             Map<String, String> resUrlIdMap = new HashMap<>();
             Map<String, String> resDistroIdMap = new HashMap<>();
             Map<String, JSONObject> resourceList = new HashMap<>();
@@ -209,37 +214,27 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
                 queryResponse = queryClient.execute(httpGet);
                 if (queryResponse.getStatusLine().getStatusCode() == 200) {
                     LOG.debug("Dataset found");
-                    exists = true;
+                    datasetExists = true;
 
                     JSONObject response = new JSONObject(EntityUtils.toString(queryResponse.getEntity())).getJSONObject("result");
                     JSONArray resourcesArray = response.getJSONArray("resources");
                     for (int i = 0; i < resourcesArray.length(); i++) {
-                        try {
-                            String id = resourcesArray.getJSONObject(i).getString("id");
-                            resourceList.put(id, resourcesArray.getJSONObject(i));
+                        String id = resourcesArray.getJSONObject(i).getString("id");
+                        resourceList.put(id, resourcesArray.getJSONObject(i));
 
-                            String url = resourcesArray.getJSONObject(i).getString("url");
-                            resUrlIdMap.put(url, id);
+                        String url = resourcesArray.getJSONObject(i).getString("url");
+                        resUrlIdMap.put(url, id);
 
-                            if (resourcesArray.getJSONObject(i).has("distro_url")) {
-                                String distro = resourcesArray.getJSONObject(i).getString("distro_url");
-                                resDistroIdMap.put(distro, id);
-                            }
-                        } catch (JSONException e) {
-                            LOG.error(e.getLocalizedMessage(), e);
+                        if (resourcesArray.getJSONObject(i).has("distro_url")) {
+                            String distro = resourcesArray.getJSONObject(i).getString("distro_url");
+                            resDistroIdMap.put(distro, id);
                         }
                     }
                 } else {
                     String ent = EntityUtils.toString(queryResponse.getEntity());
                     LOG.debug("Dataset not found: " + ent);
                 }
-            } catch (ClientProtocolException e) {
-                LOG.error(e.getLocalizedMessage(), e);
-            } catch (IOException e) {
-                LOG.error(e.getLocalizedMessage(), e);
-            } catch (ParseException e) {
-                LOG.error(e.getLocalizedMessage(), e);
-            } catch (JSONException e) {
+            } catch (Exception e) {
                 LOG.error(e.getLocalizedMessage(), e);
             } finally {
                 if (queryResponse != null) {
@@ -270,7 +265,6 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
                 org_extras.put(new JSONObject().put("key", "uri").put("value", publisher_uri));
                 root.put("extras", org_extras);
 
-                CloseableHttpClient client = HttpClientBuilder.create().setRedirectStrategy(new LaxRedirectStrategy()).build();
                 HttpPost httpPost = new HttpPost(apiURI + "/organization_create");
                 httpPost.addHeader(new BasicHeader("Authorization", configuration.getApiKey()));
 
@@ -281,7 +275,7 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
                 CloseableHttpResponse response = null;
 
                 try {
-                    response = client.execute(httpPost);
+                    response = postClient.execute(httpPost);
                     if (response.getStatusLine().getStatusCode() == 200) {
                         LOG.debug("Organization created OK");
                         //LOG.info("Response: " + EntityUtils.toString(response.getEntity()));
@@ -295,15 +289,12 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
                         LOG.error("Response:" + ent);
                         throw exceptionFactory.failed("Error creating organization: " + ent);
                     }
-                } catch (ClientProtocolException e) {
-                    LOG.error(e.getLocalizedMessage(), e);
-                } catch (IOException e) {
+                } catch (Exception e) {
                     LOG.error(e.getLocalizedMessage(), e);
                 } finally {
                     if (response != null) {
                         try {
                             response.close();
-                            client.close();
                         } catch (IOException e) {
                             LOG.error(e.getLocalizedMessage(), e);
                             throw exceptionFactory.failed("Error creating dataset");
@@ -318,12 +309,7 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
 
             JSONArray tags = new JSONArray();
             for (String keyword : keywords) {
-                String safekeyword = keyword.replace(",","")
-                        .replace(".","")
-                        .replace("/","-")
-                        .replace(":","-")
-                        .replace(";","-")
-                        .replace("§", "paragraf");
+                String safekeyword = fixKeyword(keyword);
                 if (safekeyword.length() < 2) {
                     continue;
                 } else {
@@ -356,6 +342,12 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
             }
 
             //Distributions
+
+            LinkedList<String> distributions = new LinkedList<>();
+            for (Map<String, Value> map : executeSelectQuery("SELECT ?distribution WHERE {<" + datasetURI + "> <" + DcatAp11ToCkanBatchVocabulary.DCAT_DISTRIBUTION + "> ?distribution }")) {
+                distributions.add(map.get("distribution").stringValue());
+            }
+
             for (String distribution : distributions) {
                 JSONObject distro = new JSONObject();
 
@@ -366,7 +358,7 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
                 String dwnld = executeSimpleSelectQuery("SELECT ?dwnld WHERE {<" + distribution + "> <" + DcatAp11ToCkanBatchVocabulary.DCAT_DOWNLOADURL + "> ?dwnld }", "dwnld");
                 String access = executeSimpleSelectQuery("SELECT ?acc WHERE {<" + distribution + "> <" + DcatAp11ToCkanBatchVocabulary.DCAT_ACCESSURL + "> ?acc }", "acc");
 
-                //hack
+                //we prefer downloadURL, but only accessURL is mandatory
                 if (dwnld == null || dwnld.isEmpty()) {
                     dwnld = access;
                     if (dwnld == null || dwnld.isEmpty()) {
@@ -418,12 +410,12 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
             root.put("tags", tags);
             root.put("resources", resources);
 
-            if (!exists) {
+            if (!datasetExists) {
                 JSONObject createRoot = new JSONObject();
+                CloseableHttpResponse response = null;
 
                 createRoot.put("name", datasetID);
                 createRoot.put("title", title);
-
                 createRoot.put("owner_org", organizations.get(publisher_uri));
 
                 LOG.debug("Creating dataset in CKAN");
@@ -435,8 +427,6 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
                 LOG.debug("Creating dataset with: " + json);
 
                 httpPost.setEntity(new StringEntity(json, Charset.forName("utf-8")));
-
-                CloseableHttpResponse response = null;
 
                 try {
                     response = createClient.execute(httpPost);
@@ -452,9 +442,7 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
                         LOG.error("Response:" + ent);
                         throw exceptionFactory.failed("Error creating dataset");
                     }
-                } catch (ClientProtocolException e) {
-                    LOG.error(e.getLocalizedMessage(), e);
-                } catch (IOException e) {
+                } catch (Exception e) {
                     LOG.error(e.getLocalizedMessage(), e);
                 } finally {
                     if (response != null) {
@@ -489,9 +477,7 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
                     LOG.error("Response:" + ent);
                     throw exceptionFactory.failed("Error updating dataset");
                 }
-            } catch (ClientProtocolException e) {
-                LOG.error(e.getLocalizedMessage(), e);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 LOG.error(e.getLocalizedMessage(), e);
             } finally {
                 if (response != null) {
@@ -503,10 +489,8 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
                     }
                 }
             }
-
             progressReport.entryProcessed();
         }
-
 
         try {
             queryClient.close();
