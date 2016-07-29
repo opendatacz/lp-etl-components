@@ -62,13 +62,13 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
     @Component.Inject
     public ProgressReport progressReport;
 
-    CloseableHttpClient queryClient = HttpClientBuilder.create().setRedirectStrategy(new LaxRedirectStrategy()).build();
-    CloseableHttpClient createClient = HttpClientBuilder.create().setRedirectStrategy(new LaxRedirectStrategy()).build();
-    CloseableHttpClient postClient = HttpClients.createDefault();
+    private CloseableHttpClient queryClient = HttpClientBuilder.create().setRedirectStrategy(new LaxRedirectStrategy()).build();
+    private CloseableHttpClient createClient = HttpClientBuilder.create().setRedirectStrategy(new LaxRedirectStrategy()).build();
+    private CloseableHttpClient postClient = HttpClients.createDefault();
 
-    String apiURI;
+    private String apiURI;
 
-    String fixKeyword(String keyword) {
+    private String fixKeyword(String keyword) {
         return keyword.replace(",","")
                 .replace(".","")
                 .replace("/","-")
@@ -77,7 +77,7 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
                 .replace("§", "paragraf");
     }
 
-    Map<String, String> getOrganizations() {
+    private Map<String, String> getOrganizations() {
         CloseableHttpResponse queryResponse = null;
         List<String> organizationList = new LinkedList<>();
         Map<String, String> organizations = new HashMap<>();
@@ -172,8 +172,6 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
 
         LOG.info("Found " + total + " datasets");
 
-        JSONArray outArray = new JSONArray();
-
         progressReport.start(total);
 
         for (String datasetURI : datasets) {
@@ -189,26 +187,13 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
                 continue;
             }
 
-            String title = executeSimpleSelectQuery("SELECT ?title WHERE {<" + datasetURI + "> <" + DCTERMS.TITLE + "> ?title FILTER(LANGMATCHES(LANG(?title), \"" + configuration.getLoadLanguage() + "\"))}", "title");
-            String description = executeSimpleSelectQuery("SELECT ?description WHERE {<" + datasetURI + "> <" + DCTERMS.DESCRIPTION + "> ?description FILTER(LANGMATCHES(LANG(?description), \"" + configuration.getLoadLanguage() + "\"))}", "description");
-            String curatorName = executeSimpleSelectQuery("SELECT ?name WHERE {<" + datasetURI + "> <" + DcatAp11ToCkanBatchVocabulary.DCAT_CONTACT_POINT + ">/<" + DcatAp11ToCkanBatchVocabulary.VCARD_FN + "> ?name }", "name");
-            String contactPoint = executeSimpleSelectQuery("SELECT ?contact WHERE {<" + datasetURI + "> <" + DcatAp11ToCkanBatchVocabulary.DCAT_CONTACT_POINT + ">/<" + DcatAp11ToCkanBatchVocabulary.VCARD_HAS_EMAIL + "> ?contact }", "contact");
-            String issued = executeSimpleSelectQuery("SELECT ?issued WHERE {<" + datasetURI + "> <" + DCTERMS.ISSUED + "> ?issued }", "issued");
-            String modified = executeSimpleSelectQuery("SELECT ?modified WHERE {<" + datasetURI + "> <" + DCTERMS.MODIFIED + "> ?modified }", "modified");
-            String publisher_uri = executeSimpleSelectQuery("SELECT ?publisher_uri WHERE {<" + datasetURI + "> <" + DCTERMS.PUBLISHER + "> ?publisher_uri }", "publisher_uri");
-            String publisher_name = executeSimpleSelectQuery("SELECT ?publisher_name WHERE {<" + datasetURI + "> <" + DCTERMS.PUBLISHER + ">/<" + FOAF.NAME + "> ?publisher_name FILTER(LANGMATCHES(LANG(?publisher_name), \"" + configuration.getLoadLanguage() + "\"))}", "publisher_name");
-
-            LinkedList<String> keywords = new LinkedList<>();
-            for (Map<String, Value> map : executeSelectQuery("SELECT ?keyword WHERE {<" + datasetURI + "> <" + DcatAp11ToCkanBatchVocabulary.DCAT_KEYWORD + "> ?keyword FILTER(LANGMATCHES(LANG(?keyword), \"" + configuration.getLoadLanguage() + "\"))}")) {
-                keywords.add(map.get("keyword").stringValue());
-            }
-
             boolean datasetExists = false;
+
             Map<String, String> resUrlIdMap = new HashMap<>();
             Map<String, String> resDistroIdMap = new HashMap<>();
             Map<String, JSONObject> resourceList = new HashMap<>();
 
-            LOG.debug("Querying for the dataset in CKAN");
+            LOG.debug("Querying for the dataset " + datasetID + " in CKAN");
             HttpGet httpGet = new HttpGet(apiURI + "/package_show?id=" + datasetID);
             try {
                 queryResponse = queryClient.execute(httpGet);
@@ -245,6 +230,14 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
                     }
                 }
             }
+
+            LinkedList<String> keywords = new LinkedList<>();
+            for (Map<String, Value> map : executeSelectQuery("SELECT ?keyword WHERE {<" + datasetURI + "> <" + DcatAp11ToCkanBatchVocabulary.DCAT_KEYWORD + "> ?keyword FILTER(LANGMATCHES(LANG(?keyword), \"" + configuration.getLoadLanguage() + "\"))}")) {
+                keywords.add(map.get("keyword").stringValue());
+            }
+
+            String publisher_uri = executeSimpleSelectQuery("SELECT ?publisher_uri WHERE {<" + datasetURI + "> <" + DCTERMS.PUBLISHER + "> ?publisher_uri }", "publisher_uri");
+            String publisher_name = executeSimpleSelectQuery("SELECT ?publisher_name WHERE {<" + datasetURI + "> <" + DCTERMS.PUBLISHER + ">/<" + FOAF.NAME + "> ?publisher_name FILTER(LANGMATCHES(LANG(?publisher_name), \"" + configuration.getLoadLanguage() + "\"))}", "publisher_name");
 
             if (!organizations.containsKey(publisher_uri)) {
                 LOG.debug("Creating organization " + publisher_uri);
@@ -310,33 +303,39 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
             JSONArray tags = new JSONArray();
             for (String keyword : keywords) {
                 String safekeyword = fixKeyword(keyword);
-                if (safekeyword.length() < 2) {
-                    continue;
-                } else {
+                if (safekeyword.length() >= 2) {
                     tags.put(new JSONObject().put("name", safekeyword));
                 }
             }
+            root.put("tags", tags);
 
             JSONArray resources = new JSONArray();
 
             if (!datasetID.isEmpty()) {
                 root.put("name", datasetID);
             }
+
+            String title = executeSimpleSelectQuery("SELECT ?title WHERE {<" + datasetURI + "> <" + DCTERMS.TITLE + "> ?title FILTER(LANGMATCHES(LANG(?title), \"" + configuration.getLoadLanguage() + "\"))}", "title");
             if (!title.isEmpty()) {
                 root.put("title", title);
             }
+            String description = executeSimpleSelectQuery("SELECT ?description WHERE {<" + datasetURI + "> <" + DCTERMS.DESCRIPTION + "> ?description FILTER(LANGMATCHES(LANG(?description), \"" + configuration.getLoadLanguage() + "\"))}", "description");
             if (!description.isEmpty()) {
                 root.put("notes", description);
             }
+            String contactPoint = executeSimpleSelectQuery("SELECT ?contact WHERE {<" + datasetURI + "> <" + DcatAp11ToCkanBatchVocabulary.DCAT_CONTACT_POINT + ">/<" + DcatAp11ToCkanBatchVocabulary.VCARD_HAS_EMAIL + "> ?contact }", "contact");
             if (!contactPoint.isEmpty()) {
                 root.put("maintainer_email", contactPoint);
             }
+            String curatorName = executeSimpleSelectQuery("SELECT ?name WHERE {<" + datasetURI + "> <" + DcatAp11ToCkanBatchVocabulary.DCAT_CONTACT_POINT + ">/<" + DcatAp11ToCkanBatchVocabulary.VCARD_FN + "> ?name }", "name");
             if (!curatorName.isEmpty()) {
                 root.put("maintainer", curatorName);
             }
+            String issued = executeSimpleSelectQuery("SELECT ?issued WHERE {<" + datasetURI + "> <" + DCTERMS.ISSUED + "> ?issued }", "issued");
             if (!issued.isEmpty()) {
                 root.put("metadata_created", issued);
             }
+            String modified = executeSimpleSelectQuery("SELECT ?modified WHERE {<" + datasetURI + "> <" + DCTERMS.MODIFIED + "> ?modified }", "modified");
             if (!modified.isEmpty()) {
                 root.put("metadata_modified", modified);
             }
@@ -352,9 +351,14 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
                 JSONObject distro = new JSONObject();
 
                 String dtitle = executeSimpleSelectQuery("SELECT ?title WHERE {<" + distribution + "> <" + DCTERMS.TITLE + "> ?title FILTER(LANGMATCHES(LANG(?title), \"" + configuration.getLoadLanguage() + "\"))}", "title");
+                if (!dtitle.isEmpty()) {
+                    distro.put("name", dtitle);
+                }
                 String ddescription = executeSimpleSelectQuery("SELECT ?description WHERE {<" + distribution + "> <" + DCTERMS.DESCRIPTION + "> ?description FILTER(LANGMATCHES(LANG(?description), \"" + configuration.getLoadLanguage() + "\"))}", "description");
-                String dissued = executeSimpleSelectQuery("SELECT ?issued WHERE {<" + distribution + "> <" + DCTERMS.ISSUED + "> ?issued }", "issued");
-                String dmodified = executeSimpleSelectQuery("SELECT ?modified WHERE {<" + distribution + "> <" + DCTERMS.MODIFIED + "> ?modified }", "modified");
+                if (!ddescription.isEmpty()) {
+                    distro.put("description", ddescription);
+                }
+
                 String dwnld = executeSimpleSelectQuery("SELECT ?dwnld WHERE {<" + distribution + "> <" + DcatAp11ToCkanBatchVocabulary.DCAT_DOWNLOADURL + "> ?dwnld }", "dwnld");
                 String access = executeSimpleSelectQuery("SELECT ?acc WHERE {<" + distribution + "> <" + DcatAp11ToCkanBatchVocabulary.DCAT_ACCESSURL + "> ?acc }", "acc");
 
@@ -367,12 +371,6 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
                     }
                 }
 
-                if (!dtitle.isEmpty()) {
-                    distro.put("name", dtitle);
-                }
-                if (!ddescription.isEmpty()) {
-                    distro.put("description", ddescription);
-                }
                 if (!dwnld.isEmpty()) {
                     distro.put("url", dwnld);
                 }
@@ -392,9 +390,11 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
                     resourceList.remove(id);
                 }
 
+                String dissued = executeSimpleSelectQuery("SELECT ?issued WHERE {<" + distribution + "> <" + DCTERMS.ISSUED + "> ?issued }", "issued");
                 if (!dissued.isEmpty()) {
                     distro.put("created", dissued);
                 }
+                String dmodified = executeSimpleSelectQuery("SELECT ?modified WHERE {<" + distribution + "> <" + DCTERMS.MODIFIED + "> ?modified }", "modified");
                 if (!dmodified.isEmpty()) {
                     distro.put("last_modified", dmodified);
                 }
@@ -407,9 +407,9 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
                 resources.put(resource.getValue());
             }
 
-            root.put("tags", tags);
             root.put("resources", resources);
 
+            //Create new dataset
             if (!datasetExists) {
                 JSONObject createRoot = new JSONObject();
                 CloseableHttpResponse response = null;
@@ -456,16 +456,15 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
                 }
             }
 
+            //Update existing dataset
             String json = root.toString();
-
             LOG.debug("Posting to CKAN");
             HttpPost httpPost = new HttpPost(apiURI + "/package_update?id=" + datasetID);
             httpPost.addHeader(new BasicHeader("Authorization", configuration.getApiKey()));
 
-            LOG.debug(json);
+            //LOG.debug(json);
 
             httpPost.setEntity(new StringEntity(json, Charset.forName("utf-8")));
-
             CloseableHttpResponse response = null;
 
             try {
@@ -489,6 +488,7 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
                     }
                 }
             }
+
             progressReport.entryProcessed();
         }
 
