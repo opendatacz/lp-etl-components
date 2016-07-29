@@ -1,14 +1,20 @@
-<div layout-gt-sm="row">
-    <md-input-container class="md-block" flex-gt-sm>
-        <label>CKAN Action API URL</label>
-        <input type="url" ng-model="dialog.apiUrl" required placeholder="http://localhost/api/3/action">
-    </md-input-container>
-    <md-input-container class="md-block" flex-gt-sm>
-        <label>CKAN API Key</label>
-        <input ng-model="dialog.apiKey" required placeholder="00000000-0000-0000-0000-000000000000">
-    </md-input-container>
-    <md-input-container class="md-block" flex-gt-sm>
-        <label>Load language RDF language tag</label>
-        <input ng-model="dialog.loadLanguage" required placeholder="en">
-    </md-input-container>
-</div>
+<md-input-container class="md-block" flex-gt-sm>
+    <label>CKAN Action API URL</label>
+    <input type="url" ng-model="dialog.apiUrl" required placeholder="http://localhost/api/3/action">
+</md-input-container>
+<md-input-container class="md-block" flex-gt-sm>
+    <label>CKAN API Key</label>
+    <input ng-model="dialog.apiKey" required placeholder="00000000-0000-0000-0000-000000000000">
+</md-input-container>
+<md-input-container class="md-block" flex-gt-sm>
+    <label>Load language RDF language tag</label>
+    <input ng-model="dialog.loadLanguage" required placeholder="en">
+</md-input-container>
+<md-input-container class="md-block" flex-gt-sm>
+    <label>Profile</label>
+    <md-select ng-model="dialog.profile">
+        <md-option ng-repeat="profile in profiles" value="{{profile['@id']}}">
+            <span ng-repeat="label in profile['http://www.w3.org/2004/02/skos/core#prefLabel'] | filter:{'@language':'en'} ">{{label['@value']}}</span>
+        </md-option>
+    </md-select>
+</md-input-container>

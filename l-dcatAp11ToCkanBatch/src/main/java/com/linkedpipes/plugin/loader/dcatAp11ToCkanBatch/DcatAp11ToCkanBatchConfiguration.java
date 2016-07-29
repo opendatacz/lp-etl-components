@@ -18,6 +18,8 @@ public class DcatAp11ToCkanBatchConfiguration {
     @RdfToPojo.Property(uri = DcatAp11ToCkanBatchConfigVocabulary.LOAD_LANGUAGE)
     private String loadLanguage;
 
+    @RdfToPojo.Property(uri = DcatAp11ToCkanBatchConfigVocabulary.PROFILE)
+    private String profile ;
 
     public DcatAp11ToCkanBatchConfiguration() {
     }
@@ -46,4 +48,11 @@ public class DcatAp11ToCkanBatchConfiguration {
         this.loadLanguage = loadLanguage;
     }
 
+    public String getProfile() {
+        return profile;
+    }
+
+    public void setProfile(String profile) {
+        this.profile = profile;
+    }
 }

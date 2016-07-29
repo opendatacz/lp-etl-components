@@ -5,7 +5,8 @@
             "@type" : ["http://plugins.linkedpipes.com/ontology/l-dcatAp11ToCkanBatch#Configuration"],
             "http://plugins.linkedpipes.com/ontology/l-dcatAp11ToCkanBatch#apiUri": "",
             "http://plugins.linkedpipes.com/ontology/l-dcatAp11ToCkanBatch#apiKey" : "",
-            "http://plugins.linkedpipes.com/ontology/l-dcatAp11ToCkan#loadLanguage" : "en"
+            "http://plugins.linkedpipes.com/ontology/l-dcatAp11ToCkan#loadLanguage" : "en",
+            "http://plugins.linkedpipes.com/ontology/l-dcatAp11ToCkan#profile" : "http://plugins.etl.linkedpipes.com/resource/l-dcatAp11ToCkanBatch/profiles/CKAN"
         }
     ]
 }

@@ -340,6 +340,44 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
                 root.put("metadata_modified", modified);
             }
 
+            if (configuration.getProfile() == DcatAp11ToCkanBatchVocabulary.PROFILES_NKOD.stringValue()) {
+                if (!publisher_uri.isEmpty()) {
+                    root.put("publisher_uri", publisher_uri);
+                }
+                if (!publisher_name.isEmpty()) {
+                    root.put("publisher_name", publisher_name);
+                }
+
+                String periodicity = executeSimpleSelectQuery("SELECT ?periodicity WHERE {<" + datasetURI + "> <"+ DCTERMS.ACCRUAL_PERIODICITY + "> ?periodicity }", "periodicity");
+                if (!periodicity.isEmpty()) {
+                    root.put("frequency", periodicity);
+                }
+                String temporalStart = executeSimpleSelectQuery("SELECT ?temporalStart WHERE {<" + datasetURI + "> <"+ DCTERMS.TEMPORAL + ">/<" + DcatAp11ToCkanBatchVocabulary.SCHEMA_STARTDATE + "> ?temporalStart }", "temporalStart");
+                if (!temporalStart.isEmpty()) {
+                    root.put("temporal_start", temporalStart);
+                }
+                String temporalEnd = executeSimpleSelectQuery("SELECT ?temporalEnd WHERE {<" + datasetURI + "> <"+ DCTERMS.TEMPORAL + ">/<" + DcatAp11ToCkanBatchVocabulary.SCHEMA_ENDDATE  + "> ?temporalEnd }", "temporalEnd");
+                if (!temporalEnd.isEmpty()) {
+                    root.put("temporal_end", temporalEnd);
+                }
+                String schemaURL = executeSimpleSelectQuery("SELECT ?schema WHERE {<" + datasetURI + "> <"+ DCTERMS.CONFORMS_TO + "> ?schema }", "schema");
+                if (!schemaURL.isEmpty()) {
+                    root.put("schema", schemaURL);
+                }
+                String spatial = executeSimpleSelectQuery("SELECT ?spatial WHERE {<" + datasetURI + "> <"+ DCTERMS.SPATIAL + "> ?spatial }", "spatial");
+                if (!spatial.isEmpty()) {
+                    root.put("spatial_uri", spatial);
+                }
+                LinkedList<String> themes = new LinkedList<>();
+                for (Map<String,Value> map: executeSelectQuery("SELECT ?theme WHERE {<" + datasetURI + "> <"+ DcatAp11ToCkanBatchVocabulary.DCAT_THEME + "> ?theme }")) {
+                    themes.add(map.get("theme").stringValue());
+                }
+                String concatThemes = "";
+                for (String theme: themes) { concatThemes += theme + " ";}
+                if (!concatThemes.isEmpty())  root.put("theme", concatThemes);
+
+            }
+
             //Distributions
 
             LinkedList<String> distributions = new LinkedList<>();
@@ -397,6 +435,33 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
                 String dmodified = executeSimpleSelectQuery("SELECT ?modified WHERE {<" + distribution + "> <" + DCTERMS.MODIFIED + "> ?modified }", "modified");
                 if (!dmodified.isEmpty()) {
                     distro.put("last_modified", dmodified);
+                }
+
+                if (configuration.getProfile() == DcatAp11ToCkanBatchVocabulary.PROFILES_NKOD.stringValue()) {
+                    String dtemporalStart = executeSimpleSelectQuery("SELECT ?temporalStart WHERE {<" + distribution + "> <"+ DCTERMS.TEMPORAL + ">/<" + DcatAp11ToCkanBatchVocabulary.SCHEMA_STARTDATE + "> ?temporalStart }", "temporalStart");
+                    if (!dtemporalStart.isEmpty()) {
+                        distro.put("temporal_start", dtemporalStart);
+                    }
+                    String dtemporalEnd = executeSimpleSelectQuery("SELECT ?temporalEnd WHERE {<" + distribution + "> <"+ DCTERMS.TEMPORAL + ">/<" + DcatAp11ToCkanBatchVocabulary.SCHEMA_ENDDATE  + "> ?temporalEnd }", "temporalEnd");
+                    if (!dtemporalEnd.isEmpty()) {
+                        distro.put("temporal_end", dtemporalEnd);
+                    }
+                    String dspatial = executeSimpleSelectQuery("SELECT ?spatial WHERE {<" + distribution + "> <"+ DCTERMS.SPATIAL + "> ?spatial }", "spatial");
+                    if (!dspatial.isEmpty()) {
+                        root.put("spatial_uri", dspatial);
+                    }
+                    String dschemaURL = executeSimpleSelectQuery("SELECT ?schema WHERE {<" + distribution + "> <"+ DCTERMS.CONFORMS_TO + "> ?schema }", "schema");
+                    if (!dschemaURL.isEmpty()) {
+                        distro.put("describedBy", dschemaURL);
+                    }
+                    String dlicense = executeSimpleSelectQuery("SELECT ?license WHERE {<" + distribution + "> <"+ DCTERMS.LICENSE + "> ?license }", "license");
+                    if (!dlicense.isEmpty()) {
+                        distro.put("license_link", dlicense);
+                    }
+                    String dmimetype = executeSimpleSelectQuery("SELECT ?format WHERE {<" + distribution + "> <"+ DcatAp11ToCkanBatchVocabulary.DCAT_MEDIATYPE + "> ?format }", "format");
+                    if (!dmimetype.isEmpty()) {
+                        distro.put("mimetype", dmimetype.replaceAll(".*\\/([^\\/]+\\/[^\\/]+)","$1"));
+                    }
                 }
 
                 resources.put(distro);

@@ -23,6 +23,7 @@ public class DcatAp11ToCkanBatchTest {
         component.configuration.setApiUri("http://xrg11.projekty.ms.mff.cuni.cz:5005/api/3/action");
         component.configuration.setApiKey("64d4c649-173a-4623-ab45-ec17e0ceec30");
         component.configuration.setLoadLanguage("cs");
+        component.configuration.setProfile("http://plugins.etl.linkedpipes.com/resource/l-dcatAp11ToCkanBatch/profiles/CZ-NKOD");
 
         try (final TestEnvironment env = TestEnvironment.create(component, TestUtils.getTempDirectory())) {
             TestUtils.load(env.bindSingleGraphDataUnit("Metadata"),

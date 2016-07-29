@@ -25,6 +25,8 @@ public class DcatAp11ToCkanBatchVocabulary {
 
     public static final String LODCZCKAN = "http://linked.opendata.cz/ontology/ckan/";
 
+    public static final String PROFILES = "http://plugins.etl.linkedpipes.com/resource/l-dcatAp11ToCkanBatch/profiles/";
+
     public static final IRI DCAT_DISTRIBUTION_CLASS;
 
     public static final IRI DCAT_DATASET_CLASS;
@@ -71,6 +73,10 @@ public class DcatAp11ToCkanBatchVocabulary {
 
     public static final IRI LODCZCKAN_DATASET_ID;
 
+    public static final IRI PROFILES_CKAN;
+
+    public static final IRI PROFILES_NKOD;
+
     static {
         final SimpleValueFactory valueFactory = SimpleValueFactory.getInstance();
 
@@ -97,6 +103,9 @@ public class DcatAp11ToCkanBatchVocabulary {
         VCARD_HAS_EMAIL = valueFactory.createIRI(VCARD + "hasEmail");
         VCARD_FN = valueFactory.createIRI(VCARD + "fn");
         LODCZCKAN_DATASET_ID = valueFactory.createIRI(LODCZCKAN + "datasetID");
+
+        PROFILES_CKAN = valueFactory.createIRI(PROFILES + "CKAN");
+        PROFILES_NKOD = valueFactory.createIRI(PROFILES + "CZ-NKOD");
     }
 
 }

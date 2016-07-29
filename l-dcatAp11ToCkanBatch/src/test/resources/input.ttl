@@ -49,8 +49,10 @@
 	<http://purl.org/dc/terms/modified> "2016-07-25"^^<http://www.w3.org/2001/XMLSchema#date> ;
 	<http://purl.org/dc/terms/publisher> <https://cssz.cz> ;
 	<http://purl.org/dc/terms/title> "Dataset title"@en ;
+	<http://purl.org/dc/terms/spatial> <http://spatialX.cz> , <http://spatialX.de> ;
+	<http://purl.org/dc/terms/temporal> <http://real.dataset.iri/distribution/temporal> ;
 	<http://www.w3.org/ns/dcat#contactPoint> <http://real.dataset.iri/contactPoint> ;
-	<http://www.w3.org/ns/dcat#keyword> "data"@en , "open"@en ;
+	<http://www.w3.org/ns/dcat#keyword> "data"@en , "open"@en, "data"@cs , "otevřená"@cs ;
 	<http://www.w3.org/ns/dcat#theme> <http://publications.europa.eu/resource/authority/data-theme/TECH> ;
 	<http://www.w3.org/ns/dqv#hasQualityAnnotation> <http://qann1.cz> , <http://qann2.cz> ;
 	<http://www.w3.org/ns/dcat#distribution> <http://real.dataset.iri/distribution> .
@@ -93,8 +95,6 @@
 	<http://purl.org/dc/terms/format> <http://publications.europa.eu/resource/authority/file-type/RDF_TRIG> ;
 	<http://purl.org/dc/terms/license> <http://my.license.url> ;
 	<http://purl.org/dc/terms/rights> <http://rights.cz> ;
-	<http://purl.org/dc/terms/spatial> <http://spatialX.cz> , <http://spatialX.de> ;
-	<http://purl.org/dc/terms/temporal> <http://real.dataset.iri/distribution/temporal> ;
 	<http://spdx.org/rdf/terms#checksum> <http://real.dataset.iri/distribution/checksum> ;
 	<http://www.w3.org/ns/adms#status> <http://purl.org/adms/status/UnderDevelopment> ;
 	<http://www.w3.org/ns/dcat#accessURL> <http://my.access.url1> , <http://my.access.url2> ;
