@@ -360,7 +360,7 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
                 if (!temporalEnd.isEmpty()) {
                     root.put("temporal_end", temporalEnd);
                 }
-                String schemaURL = executeSimpleSelectQuery("SELECT ?schema WHERE {<" + datasetURI + "> <"+ DCTERMS.CONFORMS_TO + "> ?schema }", "schema");
+                String schemaURL = executeSimpleSelectQuery("SELECT ?schema WHERE {<" + datasetURI + "> <"+ FOAF.PAGE + "> ?schema }", "schema");
                 if (!schemaURL.isEmpty()) {
                     root.put("schema", schemaURL);
                 }
