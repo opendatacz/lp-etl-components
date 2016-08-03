@@ -402,9 +402,11 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
                 }
                 //DCAT-AP v1.1: has to be am IRI from http://publications.europa.eu/mdr/authority/file-type/index.html
                 String dformat = executeSimpleSelectQuery("SELECT ?format WHERE {<" + distribution + "> <"+ DCTERMS.FORMAT + "> ?format }", "format");
-                if (!dformat.isEmpty()) {
+                if (!dformat.isEmpty() && codelists != null) {
                     String formatlabel = executeSimpleCodelistSelectQuery("SELECT ?formatlabel WHERE {<" + dformat + "> <"+ SKOS.PREF_LABEL + "> ?formatlabel FILTER(LANGMATCHES(LANG(?formatlabel), \"en\"))}", "formatlabel");
-                    distro.put("format", formatlabel);
+                    if (!formatlabel.isEmpty()) {
+                        distro.put("format", formatlabel);
+                    }
                 }
 
 
