@@ -28,6 +28,7 @@ import org.json.JSONObject;
 import org.openrdf.model.Value;
 import org.openrdf.model.vocabulary.DCTERMS;
 import org.openrdf.model.vocabulary.FOAF;
+import org.openrdf.model.vocabulary.SKOS;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.QueryResults;
@@ -52,6 +53,9 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
 
     @Component.InputPort(id = "Metadata")
     public SingleGraphDataUnit metadata;
+
+    @Component.InputPort(id = "Codelists", optional = true)
+    public SingleGraphDataUnit codelists;
 
     @Component.Configuration
     public DcatAp11ToCkanBatchConfiguration configuration;
@@ -396,6 +400,13 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
                 if (!ddescription.isEmpty()) {
                     distro.put("description", ddescription);
                 }
+                //DCAT-AP v1.1: has to be am IRI from http://publications.europa.eu/mdr/authority/file-type/index.html
+                String dformat = executeSimpleSelectQuery("SELECT ?format WHERE {<" + distribution + "> <"+ DCTERMS.FORMAT + "> ?format }", "format");
+                if (!dformat.isEmpty()) {
+                    String formatlabel = executeSimpleCodelistSelectQuery("SELECT ?formatlabel WHERE {<" + dformat + "> <"+ SKOS.PREF_LABEL + "> ?formatlabel FILTER(LANGMATCHES(LANG(?formatlabel), \"en\"))}", "formatlabel");
+                    distro.put("format", formatlabel);
+                }
+
 
                 String dwnld = executeSimpleSelectQuery("SELECT ?dwnld WHERE {<" + distribution + "> <" + DcatAp11ToCkanBatchVocabulary.DCAT_DOWNLOADURL + "> ?dwnld }", "dwnld");
                 String access = executeSimpleSelectQuery("SELECT ?acc WHERE {<" + distribution + "> <" + DcatAp11ToCkanBatchVocabulary.DCAT_ACCESSURL + "> ?acc }", "acc");
@@ -574,6 +585,22 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
             final TupleQuery preparedQuery = connection.prepareTupleQuery(QueryLanguage.SPARQL, queryAsString);
             final SimpleDataset dataset = new SimpleDataset();
             dataset.addDefaultGraph(metadata.getGraph());
+            preparedQuery.setDataset(dataset);
+            //
+            final BindingSet binding = QueryResults.singleResult(preparedQuery.evaluate());
+            if (binding == null) {
+                return "";
+            } else {
+                return binding.getValue(bindingName).stringValue();
+            }
+        });
+    }
+
+    private String executeSimpleCodelistSelectQuery(final String queryAsString, String bindingName) throws LpException {
+        return codelists.execute((connection) -> {
+            final TupleQuery preparedQuery = connection.prepareTupleQuery(QueryLanguage.SPARQL, queryAsString);
+            final SimpleDataset dataset = new SimpleDataset();
+            dataset.addDefaultGraph(codelists.getGraph());
             preparedQuery.setDataset(dataset);
             //
             final BindingSet binding = QueryResults.singleResult(preparedQuery.evaluate());
