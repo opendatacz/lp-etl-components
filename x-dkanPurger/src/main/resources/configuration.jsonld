@@ -1,0 +1,11 @@
+{
+    "@graph": [
+        {
+            "@id": "http://localhost/resources/configuration",
+            "@type" : ["http://plugins.linkedpipes.com/ontology/x-dkanPurger#Configuration"],
+            "http://plugins.linkedpipes.com/ontology/x-dkanPurger#apiUri": "",
+            "http://plugins.linkedpipes.com/ontology/x-dkanPurger#username" : ""
+            "http://plugins.linkedpipes.com/ontology/x-dkanPurger#password" : ""
+        }
+    ]
+}
