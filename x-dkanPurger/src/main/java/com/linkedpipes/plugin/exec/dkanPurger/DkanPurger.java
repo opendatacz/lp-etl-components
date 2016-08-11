@@ -51,6 +51,8 @@ public final class DkanPurger implements Component.Sequential {
     private CloseableHttpClient queryClient = HttpClientBuilder.create().setRedirectStrategy(new LaxRedirectStrategy()).build();
     private CloseableHttpClient postClient = HttpClients.createDefault();
 
+    private int pagesize = 20;
+
     private String apiURI;
 
     private String token;
@@ -101,31 +103,39 @@ public final class DkanPurger implements Component.Sequential {
     private List<String> getNodes() {
         CloseableHttpResponse queryResponse = null;
         List<String> nodeList = new LinkedList<>();
-        HttpGet httpGetOrg = new HttpGet(apiURI + "/node");
 
         LOG.debug("Querying DKAN for nodes");
+        int page = 0;
 
-        try {
-            queryResponse = queryClient.execute(httpGetOrg);
-            if (queryResponse.getStatusLine().getStatusCode() == 200) {
-                JSONArray response = new JSONArray(EntityUtils.toString(queryResponse.getEntity()));
-                for (Object o : response) {
-                    nodeList.add(new JSONObject(o.toString()).getString("uri"));
+        while (true) {
+            HttpGet httpGetOrg = new HttpGet(apiURI + "/node?pagesize=" + pagesize + "&page=" + page);
+            try {
+                queryResponse = queryClient.execute(httpGetOrg);
+                if (queryResponse.getStatusLine().getStatusCode() == 200) {
+                    JSONArray response = new JSONArray(EntityUtils.toString(queryResponse.getEntity()));
+                    if (response.length() == 0) {
+                        LOG.info("No more nodes found.");
+                        break;
+                    } else {
+                        for (Object o : response) {
+                            nodeList.add(new JSONObject(o.toString()).getString("uri"));
+                        }
+                        LOG.info("Node list downloaded, found " + response.length() + " new nodes, " + nodeList.size() + " total.");
+                        page++;
+                    }
+                } else {
+                    String ent = EntityUtils.toString(queryResponse.getEntity());
+                    LOG.info("Node list not downloaded: " + ent);
                 }
-                LOG.info("Node list downloaded, found " + nodeList.size() + " nodes.");
-
-            } else {
-                String ent = EntityUtils.toString(queryResponse.getEntity());
-                LOG.info("Node list not downloaded: " + ent);
-            }
-        } catch (Exception e) {
-            LOG.error(e.getLocalizedMessage(), e);
-        } finally {
-            if (queryResponse != null) {
-                try {
-                    queryResponse.close();
-                } catch (IOException e) {
-                    LOG.error(e.getLocalizedMessage(), e);
+            } catch (Exception e) {
+                LOG.error(e.getLocalizedMessage(), e);
+            } finally {
+                if (queryResponse != null) {
+                    try {
+                        queryResponse.close();
+                    } catch (IOException e) {
+                        LOG.error(e.getLocalizedMessage(), e);
+                    }
                 }
             }
         }
