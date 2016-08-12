@@ -43,6 +43,8 @@ import com.linkedpipes.etl.component.api.service.ExceptionFactory;
 import com.linkedpipes.etl.executor.api.v1.exception.LpException;
 import org.openrdf.query.impl.SimpleDataset;
 
+import static java.lang.Thread.sleep;
+
 /**
  *
  * @author Klímek Jakub
@@ -72,6 +74,8 @@ public final class DcatAp11ToDkanBatch implements Component.Sequential {
 
     private String apiURI;
 
+    private static final int pagesize = 20;
+
     private String fixKeyword(String keyword) {
         return keyword.replace(",","")
                 .replace(".","")
@@ -85,32 +89,41 @@ public final class DcatAp11ToDkanBatch implements Component.Sequential {
         CloseableHttpResponse queryResponse = null;
         List<String> groupList = new LinkedList<>();
         Map<String, String> groups = new HashMap<>();
-        HttpGet httpGetOrg = new HttpGet(apiURI + "/node.json?parameters[type]=group");
 
         LOG.debug("Querying DKAN for groups");
+        int page = 0;
 
-        try {
-            queryResponse = queryClient.execute(httpGetOrg);
-            if (queryResponse.getStatusLine().getStatusCode() == 200) {
-                JSONArray response = new JSONArray(EntityUtils.toString(queryResponse.getEntity()));
-                for (Object o : response) {
-                    JSONObject jo = (JSONObject) o;
-                    groupList.add(jo.getString("nid"));
+        while (true) {
+            HttpGet httpGetOrg = new HttpGet(apiURI + "/node.json?parameters[type]=group&pagesize=" + pagesize + "&page=" + page);
+            try {
+                queryResponse = queryClient.execute(httpGetOrg);
+                if (queryResponse.getStatusLine().getStatusCode() == 200) {
+                    JSONArray response = new JSONArray(EntityUtils.toString(queryResponse.getEntity()));
+                    if (response.length() == 0) {
+                        LOG.info("No more groups found");
+                        break;
+                    }
+                    else {
+                        for (Object o : response) {
+                            JSONObject jo = (JSONObject) o;
+                            groupList.add(jo.getString("nid"));
+                        }
+                        LOG.info("Groups downloaded, found " + response.length() + " new groups, " + groupList.size() + "total.");
+                        page++;
+                    }
+                } else {
+                    String ent = EntityUtils.toString(queryResponse.getEntity());
+                    LOG.info("Groups not downloaded: " + ent);
                 }
-                LOG.info("Groups downloaded, found " + groupList.size() + " groups.");
-
-            } else {
-                String ent = EntityUtils.toString(queryResponse.getEntity());
-                LOG.info("Groups not downloaded: " + ent);
-            }
-        } catch (Exception e) {
-            LOG.error(e.getLocalizedMessage(), e);
-        } finally {
-            if (queryResponse != null) {
-                try {
-                    queryResponse.close();
-                } catch (IOException e) {
-                    LOG.error(e.getLocalizedMessage(), e);
+            } catch (Exception e) {
+                LOG.error(e.getLocalizedMessage(), e);
+            } finally {
+                if (queryResponse != null) {
+                    try {
+                        queryResponse.close();
+                    } catch (IOException e) {
+                        LOG.error(e.getLocalizedMessage(), e);
+                    }
                 }
             }
         }
@@ -198,6 +211,9 @@ public final class DcatAp11ToDkanBatch implements Component.Sequential {
 
         apiURI = configuration.getApiUri();
 
+        //for HTTP request failing on "failed to respond"
+        boolean responded = false;
+
         if (apiURI == null
                 || apiURI.isEmpty()
                 || configuration.getUsername() == null
@@ -264,29 +280,33 @@ public final class DcatAp11ToDkanBatch implements Component.Sequential {
 
                 CloseableHttpResponse response = null;
 
-                try {
-                    response = postClient.execute(httpPost);
-                    if (response.getStatusLine().getStatusCode() == 200) {
-                        LOG.debug("Group created OK");
-                        String orgID = new JSONObject(EntityUtils.toString(response.getEntity())).getString("nid");
-                        groups.put(publisher_uri, orgID);
-                    } else {
-                        String ent = EntityUtils.toString(response.getEntity());
-                        LOG.error("Group:" + ent);
-                        throw exceptionFactory.failed("Error creating group: " + ent);
-                    }
-                } catch (Exception e) {
-                    LOG.error(e.getLocalizedMessage(), e);
-                } finally {
-                    if (response != null) {
-                        try {
-                            response.close();
-                        } catch (IOException e) {
-                            LOG.error(e.getLocalizedMessage(), e);
-                            throw exceptionFactory.failed("Error creating group");
+                responded = false;
+                do {
+                    try {
+                        response = postClient.execute(httpPost);
+                        if (response.getStatusLine().getStatusCode() == 200) {
+                            LOG.debug("Group created OK");
+                            String orgID = new JSONObject(EntityUtils.toString(response.getEntity())).getString("nid");
+                            groups.put(publisher_uri, orgID);
+                        } else {
+                            String ent = EntityUtils.toString(response.getEntity());
+                            LOG.error("Group:" + ent);
+                            //throw exceptionFactory.failed("Error creating group: " + ent);
+                        }
+                        responded = true;
+                    } catch (Exception e) {
+                        LOG.error(e.getLocalizedMessage(), e);
+                    } finally {
+                        if (response != null) {
+                            try {
+                                response.close();
+                            } catch (IOException e) {
+                                LOG.error(e.getLocalizedMessage(), e);
+                                throw exceptionFactory.failed("Error creating group");
+                            }
                         }
                     }
-                }
+                } while (!responded);
             }
 
             ArrayList<NameValuePair> datasetFields = new ArrayList<>();
@@ -486,13 +506,17 @@ public final class DcatAp11ToDkanBatch implements Component.Sequential {
                         distroFields.add(new BasicNameValuePair("field_described_by[und][0][value]", dschemaURL));
                     }
                     String dlicense = executeSimpleSelectQuery("SELECT ?license WHERE {<" + distribution + "> <"+ DCTERMS.LICENSE + "> ?license }", "license");
-                    if (!dlicense.isEmpty()) {
-                        distroFields.add(new BasicNameValuePair("field_licence[und][0][value]", dlicense));
+                    if (dlicense.isEmpty()) {
+                        //This is mandatory in NKOD and DKAN extension
+                        dlicense = "http://joinup.ec.europa.eu/category/licence/unknown-licence";
                     }
-                    if (!dmimetype.isEmpty()) {
+                    distroFields.add(new BasicNameValuePair("field_licence[und][0][value]", dlicense));
+                    if (dmimetype.isEmpty()) {
                         //! field_format => mimetype
-                        distroFields.add(new BasicNameValuePair("field_field_format[und][0][value]", dmimetype.replaceAll(".*\\/([^\\/]+\\/[^\\/]+)","$1")));
+                        //This is mandatory in NKOD and DKAN extension
+                        dmimetype = "http://www.iana.org/assignments/media-types/application/octet-stream";
                     }
+                    distroFields.add(new BasicNameValuePair("field_field_format[und][0][value]", dmimetype.replaceAll(".*\\/([^\\/]+\\/[^\\/]+)","$1")));
                 }
 
                 //POST DISTRIBUTION
@@ -513,29 +537,33 @@ public final class DcatAp11ToDkanBatch implements Component.Sequential {
                 CloseableHttpResponse response = null;
 
                 String resID = null;
-                try {
-                    response = postClient.execute(httpPost);
-                    if (response.getStatusLine().getStatusCode() == 200) {
-                        LOG.debug("Resource created OK");
-                        resID = new JSONObject(EntityUtils.toString(response.getEntity())).getString("nid");
-                        datasetFields.add(new BasicNameValuePair("field_resources[und][" + d + "][target_id]", dtitle + " (" + resID + ")"));
-                    } else {
-                        String ent = EntityUtils.toString(response.getEntity());
-                        LOG.error("Resource:" + ent);
-                        //throw exceptionFactory.failed("Error creating resource: " + ent);
-                    }
-                } catch (Exception e) {
-                    LOG.error(e.getLocalizedMessage(), e);
-                } finally {
-                    if (response != null) {
-                        try {
-                            response.close();
-                        } catch (IOException e) {
-                            LOG.error(e.getLocalizedMessage(), e);
-                            //throw exceptionFactory.failed("Error creating resource");
+                responded = false;
+                do {
+                    try {
+                        response = postClient.execute(httpPost);
+                        if (response.getStatusLine().getStatusCode() == 200) {
+                            LOG.debug("Resource created OK");
+                            resID = new JSONObject(EntityUtils.toString(response.getEntity())).getString("nid");
+                            datasetFields.add(new BasicNameValuePair("field_resources[und][" + d + "][target_id]", dtitle + " (" + resID + ")"));
+                        } else {
+                            String ent = EntityUtils.toString(response.getEntity());
+                            LOG.error("Resource:" + ent);
+                            //throw exceptionFactory.failed("Error creating resource: " + ent);
+                        }
+                        responded = true;
+                    } catch (Exception e) {
+                        LOG.error(e.getLocalizedMessage(), e);
+                    } finally {
+                        if (response != null) {
+                            try {
+                                response.close();
+                            } catch (IOException e) {
+                                LOG.error(e.getLocalizedMessage(), e);
+                                //throw exceptionFactory.failed("Error creating resource");
+                            }
                         }
                     }
-                }
+                } while (!responded) ;
 
             }
 
@@ -554,27 +582,32 @@ public final class DcatAp11ToDkanBatch implements Component.Sequential {
 
             CloseableHttpResponse response = null;
 
-            try {
-                response = postClient.execute(httpPost);
-                if (response.getStatusLine().getStatusCode() == 200) {
-                    LOG.debug("Dataset created OK");
-                } else {
-                    String ent = EntityUtils.toString(response.getEntity());
-                    LOG.error("Dataset:" + ent);
-                    throw exceptionFactory.failed("Error creating dataset: " + ent);
-                }
-            } catch (Exception e) {
-                LOG.error(e.getLocalizedMessage(), e);
-            } finally {
-                if (response != null) {
-                    try {
-                        response.close();
-                    } catch (IOException e) {
-                        LOG.error(e.getLocalizedMessage(), e);
-                        throw exceptionFactory.failed("Error creating dataset");
+            responded = false ;
+            do {
+                try {
+                    response = postClient.execute(httpPost);
+                    if (response.getStatusLine().getStatusCode() == 200) {
+                        LOG.debug("Dataset created OK");
+                    } else {
+                        String ent = EntityUtils.toString(response.getEntity());
+                        LOG.error("Dataset:" + ent);
+                        //throw exceptionFactory.failed("Error creating dataset: " + ent);
+                    }
+                    responded = true;
+                } catch (Exception e) {
+                    LOG.error(e.getLocalizedMessage(), e);
+                } finally {
+                    if (response != null) {
+                        try {
+                            response.close();
+                        } catch (IOException e) {
+                            LOG.error(e.getLocalizedMessage(), e);
+                            throw exceptionFactory.failed("Error creating dataset");
+                        }
                     }
                 }
-            }
+            } while (!responded);
+
             progressReport.entryProcessed();
         }
 
@@ -606,22 +639,6 @@ public final class DcatAp11ToDkanBatch implements Component.Sequential {
         });
     }
 
-    private String executeSimpleCodelistSelectQuery(final String queryAsString, String bindingName) throws LpException {
-        return codelists.execute((connection) -> {
-            final TupleQuery preparedQuery = connection.prepareTupleQuery(QueryLanguage.SPARQL, queryAsString);
-            final SimpleDataset dataset = new SimpleDataset();
-            dataset.addDefaultGraph(codelists.getGraph());
-            preparedQuery.setDataset(dataset);
-            //
-            final BindingSet binding = QueryResults.singleResult(preparedQuery.evaluate());
-            if (binding == null) {
-                return "";
-            } else {
-                return binding.getValue(bindingName).stringValue();
-            }
-        });
-    }
-
     private List<Map<String, Value>> executeSelectQuery(final String queryAsString) throws LpException {
         return metadata.execute((connection) -> {
             final List<Map<String, Value>> output = new LinkedList<>();
@@ -639,7 +656,6 @@ public final class DcatAp11ToDkanBatch implements Component.Sequential {
                 });
                 output.add(row);
             }
-
             return output;
         });
     }
