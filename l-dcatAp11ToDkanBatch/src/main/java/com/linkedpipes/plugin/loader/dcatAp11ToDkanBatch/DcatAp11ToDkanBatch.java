@@ -247,11 +247,6 @@ public final class DcatAp11ToDkanBatch implements Component.Sequential {
 
             LOG.info("Processing dataset " + current + "/" + total + ": " + datasetURI);
 
-            LinkedList<String> keywords = new LinkedList<>();
-            for (Map<String, Value> map : executeSelectQuery("SELECT ?keyword WHERE {<" + datasetURI + "> <" + DcatAp11ToDkanBatchVocabulary.DCAT_KEYWORD + "> ?keyword FILTER(LANGMATCHES(LANG(?keyword), \"" + configuration.getLoadLanguage() + "\"))}")) {
-                keywords.add(map.get("keyword").stringValue());
-            }
-
             String publisher_uri = executeSimpleSelectQuery("SELECT ?publisher_uri WHERE {<" + datasetURI + "> <" + DCTERMS.PUBLISHER + "> ?publisher_uri }", "publisher_uri");
             String publisher_name = executeSimpleSelectQuery("SELECT ?publisher_name WHERE {<" + datasetURI + "> <" + DCTERMS.PUBLISHER + ">/<" + FOAF.NAME + "> ?publisher_name FILTER(LANGMATCHES(LANG(?publisher_name), \"" + configuration.getLoadLanguage() + "\"))}", "publisher_name");
 
@@ -312,14 +307,20 @@ public final class DcatAp11ToDkanBatch implements Component.Sequential {
             ArrayList<NameValuePair> datasetFields = new ArrayList<>();
             datasetFields.add(new BasicNameValuePair("type", "dataset"));
 
-            /*JSONArray tags = new JSONArray();
+            LinkedList<String> keywords = new LinkedList<>();
+            for (Map<String, Value> map : executeSelectQuery("SELECT ?keyword WHERE {<" + datasetURI + "> <" + DcatAp11ToDkanBatchVocabulary.DCAT_KEYWORD + "> ?keyword FILTER(LANGMATCHES(LANG(?keyword), \"" + configuration.getLoadLanguage() + "\"))}")) {
+                keywords.add(map.get("keyword").stringValue());
+            }
+            String concatTags = "";
             for (String keyword : keywords) {
                 String safekeyword = fixKeyword(keyword);
                 if (safekeyword.length() >= 2) {
-                    tags.put(new JSONObject().put("name", safekeyword));
+                    concatTags += "\"\"" + safekeyword + "\"\" ";
                 }
             }
-            root.put("tags", tags);*/
+            if (!concatTags.isEmpty()) {
+                datasetFields.add(new BasicNameValuePair("field_tags[und][value_field]", concatTags));
+            }
 
             String title = executeSimpleSelectQuery("SELECT ?title WHERE {<" + datasetURI + "> <" + DCTERMS.TITLE + "> ?title FILTER(LANGMATCHES(LANG(?title), \"" + configuration.getLoadLanguage() + "\"))}", "title");
             if (!title.isEmpty()) {
@@ -418,6 +419,7 @@ public final class DcatAp11ToDkanBatch implements Component.Sequential {
                     datasetFields.add(new BasicNameValuePair("field_ruian_type[und][0][value]", "ST"));
                     datasetFields.add(new BasicNameValuePair("field_ruian_code[und][0][value]", "1"));
                 }
+                //DCAT-AP v1.1: has to be an IRI from http://publications.europa.eu/mdr/authority/file-type/index.html
                 LinkedList<String> themes = new LinkedList<>();
                 for (Map<String,Value> map: executeSelectQuery("SELECT ?theme WHERE {<" + datasetURI + "> <"+ DcatAp11ToDkanBatchVocabulary.DCAT_THEME + "> ?theme }")) {
                     themes.add(map.get("theme").stringValue());
@@ -450,7 +452,6 @@ public final class DcatAp11ToDkanBatch implements Component.Sequential {
                 if (!ddescription.isEmpty()) {
                     distroFields.add(new BasicNameValuePair("body[und][0][value]", ddescription));
                 }
-                //DCAT-AP v1.1: has to be am IRI from http://publications.europa.eu/mdr/authority/file-type/index.html
                 /*String dformat = executeSimpleSelectQuery("SELECT ?format WHERE {<" + distribution + "> <"+ DCTERMS.FORMAT + "> ?format }", "format");
                 if (!dformat.isEmpty() && codelists != null) {
                     String formatlabel = executeSimpleCodelistSelectQuery("SELECT ?formatlabel WHERE {<" + dformat + "> <"+ SKOS.PREF_LABEL + "> ?formatlabel FILTER(LANGMATCHES(LANG(?formatlabel), \"en\"))}", "formatlabel");
