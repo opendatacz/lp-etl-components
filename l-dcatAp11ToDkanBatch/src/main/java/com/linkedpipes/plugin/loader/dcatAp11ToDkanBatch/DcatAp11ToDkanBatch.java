@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 
 import com.linkedpipes.etl.component.api.service.ProgressReport;
 import org.apache.http.NameValuePair;
+import org.apache.http.NoHttpResponseException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -328,7 +329,10 @@ public final class DcatAp11ToDkanBatch implements Component.Sequential {
             }
             String description = executeSimpleSelectQuery("SELECT ?description WHERE {<" + datasetURI + "> <" + DCTERMS.DESCRIPTION + "> ?description FILTER(LANGMATCHES(LANG(?description), \"" + configuration.getLoadLanguage() + "\"))}", "description");
             if (!description.isEmpty()) {
-                datasetFields.add(new BasicNameValuePair("body[und][0]", description));
+                datasetFields.add(new BasicNameValuePair("body[und][0][value]", description));
+            } else if (configuration.getProfile().equals(DcatAp11ToDkanBatchVocabulary.PROFILES_NKOD.stringValue())) {
+                //Description is mandatory in NKOD. If missing, add at least title.
+                datasetFields.add(new BasicNameValuePair("body[und][0][value]", title));
             }
             String issued = executeSimpleSelectQuery("SELECT ?issued WHERE {<" + datasetURI + "> <" + DCTERMS.ISSUED + "> ?issued }", "issued");
             if (!issued.isEmpty()) {
@@ -363,6 +367,9 @@ public final class DcatAp11ToDkanBatch implements Component.Sequential {
                 String periodicity = executeSimpleSelectQuery("SELECT ?periodicity WHERE {<" + datasetURI + "> <"+ DCTERMS.ACCRUAL_PERIODICITY + "> ?periodicity }", "periodicity");
                 if (!periodicity.isEmpty()) {
                     datasetFields.add(new BasicNameValuePair("field_frequency_ods[und][0][value]", periodicity));
+                } else {
+                    //Mandatory in NKOD
+                    datasetFields.add(new BasicNameValuePair("field_frequency_ods[und][0][value]", "http://publications.europa.eu/resource/authority/frequency/UNKNOWN"));
                 }
                 String temporalStart = executeSimpleSelectQuery("SELECT ?temporalStart WHERE {<" + datasetURI + "> <"+ DCTERMS.TEMPORAL + ">/<" + DcatAp11ToDkanBatchVocabulary.SCHEMA_STARTDATE + "> ?temporalStart }", "temporalStart");
                 if (!temporalStart.isEmpty()) {
@@ -517,7 +524,7 @@ public final class DcatAp11ToDkanBatch implements Component.Sequential {
                         //This is mandatory in NKOD and DKAN extension
                         dmimetype = "http://www.iana.org/assignments/media-types/application/octet-stream";
                     }
-                    distroFields.add(new BasicNameValuePair("field_field_format[und][0][value]", dmimetype.replaceAll(".*\\/([^\\/]+\\/[^\\/]+)","$1")));
+                    distroFields.add(new BasicNameValuePair("field_mimetype[und][0][value]", dmimetype.replaceAll(".*\\/([^\\/]+\\/[^\\/]+)","$1")));
                 }
 
                 //POST DISTRIBUTION
@@ -541,18 +548,28 @@ public final class DcatAp11ToDkanBatch implements Component.Sequential {
                 responded = false;
                 do {
                     try {
+                        LOG.debug("POSTing resource " + distribution);
                         response = postClient.execute(httpPost);
                         if (response.getStatusLine().getStatusCode() == 200) {
-                            LOG.debug("Resource created OK");
-                            resID = new JSONObject(EntityUtils.toString(response.getEntity())).getString("nid");
-                            datasetFields.add(new BasicNameValuePair("field_resources[und][" + d + "][target_id]", dtitle + " (" + resID + ")"));
+                            String resp = EntityUtils.toString(response.getEntity());
+                            LOG.debug("Resource created OK: " + resp);
+                            try {
+                                resID = new JSONObject(resp).getString("nid");
+                                datasetFields.add(new BasicNameValuePair("field_resources[und][" + d + "][target_id]", dtitle + " (" + resID + ")"));
+                            } catch (JSONException e) {
+                                LOG.error(e.getLocalizedMessage(), e);
+                                LOG.error("Request: " + distroFields.toString());
+                                LOG.error("Response: " + resp);
+                            }
                         } else {
                             String ent = EntityUtils.toString(response.getEntity());
                             LOG.error("Resource:" + ent);
                             //throw exceptionFactory.failed("Error creating resource: " + ent);
                         }
                         responded = true;
-                    } catch (Exception e) {
+                    } catch (NoHttpResponseException e) {
+                        LOG.error(e.getLocalizedMessage(), e);
+                    } catch (IOException e) {
                         LOG.error(e.getLocalizedMessage(), e);
                     } finally {
                         if (response != null) {
@@ -586,6 +603,7 @@ public final class DcatAp11ToDkanBatch implements Component.Sequential {
             responded = false ;
             do {
                 try {
+                    LOG.debug("POSTing dataset " + datasetURI);
                     response = postClient.execute(httpPost);
                     if (response.getStatusLine().getStatusCode() == 200) {
                         LOG.debug("Dataset created OK");
@@ -595,7 +613,9 @@ public final class DcatAp11ToDkanBatch implements Component.Sequential {
                         //throw exceptionFactory.failed("Error creating dataset: " + ent);
                     }
                     responded = true;
-                } catch (Exception e) {
+                } catch (NoHttpResponseException e) {
+                    LOG.error(e.getLocalizedMessage(), e);
+                } catch (IOException e) {
                     LOG.error(e.getLocalizedMessage(), e);
                 } finally {
                     if (response != null) {
