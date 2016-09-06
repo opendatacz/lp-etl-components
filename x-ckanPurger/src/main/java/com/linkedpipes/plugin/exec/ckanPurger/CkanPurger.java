@@ -2,12 +2,8 @@ package com.linkedpipes.plugin.exec.ckanPurger;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.text.Normalizer;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 import com.linkedpipes.etl.component.api.service.ProgressReport;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -22,22 +18,12 @@ import org.apache.http.message.BasicHeader;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.openrdf.model.Value;
-import org.openrdf.model.vocabulary.DCTERMS;
-import org.openrdf.model.vocabulary.FOAF;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.QueryLanguage;
-import org.openrdf.query.QueryResults;
-import org.openrdf.query.TupleQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.linkedpipes.etl.dataunit.sesame.api.rdf.SingleGraphDataUnit;
-import org.openrdf.query.TupleQueryResult;
 import com.linkedpipes.etl.component.api.Component;
 import com.linkedpipes.etl.component.api.service.ExceptionFactory;
 import com.linkedpipes.etl.executor.api.v1.exception.LpException;
-import org.openrdf.query.impl.SimpleDataset;
 
 /**
  *
@@ -147,7 +133,7 @@ public final class CkanPurger implements Component.Sequential {
             } else {
                 String ent = EntityUtils.toString(response.getEntity());
                 LOG.error("Response:" + ent);
-                throw exceptionFactory.failed("Error purging dataset: " + ent);
+                throw exceptionFactory.failure("Error purging dataset: " + ent);
             }
         } catch (Exception e) {
             LOG.error(e.getLocalizedMessage(), e);
@@ -157,7 +143,7 @@ public final class CkanPurger implements Component.Sequential {
                     response.close();
                 } catch (IOException e) {
                     LOG.error(e.getLocalizedMessage(), e);
-                    throw exceptionFactory.failed("Error purging dataset");
+                    throw exceptionFactory.failure("Error purging dataset");
                 }
             }
         }
@@ -179,7 +165,7 @@ public final class CkanPurger implements Component.Sequential {
             } else {
                 String ent = EntityUtils.toString(response.getEntity());
                 LOG.error("Response:" + ent);
-                throw exceptionFactory.failed("Error purging organization: " + ent);
+                throw exceptionFactory.failure("Error purging organization: " + ent);
             }
         } catch (Exception e) {
             LOG.error(e.getLocalizedMessage(), e);
@@ -189,7 +175,7 @@ public final class CkanPurger implements Component.Sequential {
                     response.close();
                 } catch (IOException e) {
                     LOG.error(e.getLocalizedMessage(), e);
-                    throw exceptionFactory.failed("Error purging organization");
+                    throw exceptionFactory.failure("Error purging organization");
                 }
             }
         }
@@ -201,7 +187,7 @@ public final class CkanPurger implements Component.Sequential {
         apiURI = configuration.getApiUri();
 
         if (apiURI == null || apiURI.isEmpty() || configuration.getApiKey() == null || configuration.getApiKey().isEmpty() ) {
-            throw exceptionFactory.failed("Missing required settings.");
+            throw exceptionFactory.failure("Missing required settings.");
         }
 
         List<String> organizations = getOrganizations();

@@ -1,0 +1,2 @@
+<http://opendata.cz/resource/lp/etl/jars/x-ckanPurger/0.0.0>
+    a <http://etl.linkedpipes.com/ontology/JarFile> .
