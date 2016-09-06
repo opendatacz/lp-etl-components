@@ -2,7 +2,6 @@ package com.linkedpipes.plugin.exec.dkanPurger;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -14,7 +13,6 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
@@ -82,7 +80,7 @@ public final class DkanPurger implements Component.Sequential {
             } else {
                 String ent = EntityUtils.toString(response.getEntity());
                 LOG.error("Response:" + ent);
-                throw exceptionFactory.failed("Error logging in: " + ent);
+                throw exceptionFactory.failure("Error logging in: " + ent);
             }
         } catch (Exception e) {
             LOG.error(e.getLocalizedMessage(), e);
@@ -92,7 +90,7 @@ public final class DkanPurger implements Component.Sequential {
                     response.close();
                 } catch (IOException e) {
                     LOG.error(e.getLocalizedMessage(), e);
-                    throw exceptionFactory.failed("Error logging in");
+                    throw exceptionFactory.failure("Error logging in");
                 }
             }
         }
@@ -155,7 +153,7 @@ public final class DkanPurger implements Component.Sequential {
             } else {
                 String ent = EntityUtils.toString(response.getEntity());
                 LOG.error("Response:" + ent);
-                throw exceptionFactory.failed("Error purging node: " + ent);
+                throw exceptionFactory.failure("Error purging node: " + ent);
             }
         } catch (Exception e) {
             LOG.error(e.getLocalizedMessage(), e);
@@ -165,7 +163,7 @@ public final class DkanPurger implements Component.Sequential {
                     response.close();
                 } catch (IOException e) {
                     LOG.error(e.getLocalizedMessage(), e);
-                    throw exceptionFactory.failed("Error purging node");
+                    throw exceptionFactory.failure("Error purging node");
                 }
             }
         }
@@ -183,7 +181,7 @@ public final class DkanPurger implements Component.Sequential {
                 || configuration.getPassword() == null
                 || configuration.getPassword().isEmpty()
                 ) {
-            throw exceptionFactory.failed("Missing required settings.");
+            throw exceptionFactory.failure("Missing required settings.");
         }
 
         token = getToken(configuration.getUsername(), configuration.getPassword());

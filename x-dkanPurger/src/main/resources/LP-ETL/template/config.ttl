@@ -1,0 +1,5 @@
+<http://opendata.cz/resource/lp/etl/components/x-dkanPurger/0.0.0/configuration>
+    a <http://plugins.linkedpipes.com/ontology/x-dkanPurger#Configuration> ;
+    <http://plugins.linkedpipes.com/ontology/x-dkanPurger#apiUri> "" ;
+    <http://plugins.linkedpipes.com/ontology/x-dkanPurger#username> "" ;
+    <http://plugins.linkedpipes.com/ontology/x-dkanPurger#password> "" .

@@ -1,0 +1,5 @@
+@prefix config: <http://plugins.linkedpipes.com/ontology/configuration/> .
+
+<http://opendata.cz/resource/lp/etl/components/x-dkanPurger/0.0.0/configurationDesc>
+    a <http://plugins.linkedpipes.com/ontology/ConfigurationDescription> ;
+    config:type <http://plugins.linkedpipes.com/ontology/x-dkanPurger#Configuration> .
