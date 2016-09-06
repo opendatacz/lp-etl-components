@@ -2,10 +2,7 @@ package com.linkedpipes.plugin.loader.dcatAp11ToDkanBatch;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
-import java.text.Normalizer;
 import java.util.*;
-import java.util.Map.Entry;
 
 import com.linkedpipes.etl.component.api.service.ProgressReport;
 import org.apache.http.NameValuePair;
@@ -14,14 +11,12 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.client.LaxRedirectStrategy;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -29,7 +24,6 @@ import org.json.JSONObject;
 import org.openrdf.model.Value;
 import org.openrdf.model.vocabulary.DCTERMS;
 import org.openrdf.model.vocabulary.FOAF;
-import org.openrdf.model.vocabulary.SKOS;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.QueryResults;
@@ -44,7 +38,6 @@ import com.linkedpipes.etl.component.api.service.ExceptionFactory;
 import com.linkedpipes.etl.executor.api.v1.exception.LpException;
 import org.openrdf.query.impl.SimpleDataset;
 
-import static java.lang.Thread.sleep;
 
 /**
  *
@@ -189,7 +182,7 @@ public final class DcatAp11ToDkanBatch implements Component.Sequential {
             } else {
                 String ent = EntityUtils.toString(response.getEntity());
                 LOG.error("Response:" + ent);
-                throw exceptionFactory.failed("Error logging in: " + ent);
+                throw exceptionFactory.failure("Error logging in: " + ent);
             }
         } catch (Exception e) {
             LOG.error(e.getLocalizedMessage(), e);
@@ -199,7 +192,7 @@ public final class DcatAp11ToDkanBatch implements Component.Sequential {
                     response.close();
                 } catch (IOException e) {
                     LOG.error(e.getLocalizedMessage(), e);
-                    throw exceptionFactory.failed("Error logging in");
+                    throw exceptionFactory.failure("Error logging in");
                 }
             }
         }
@@ -222,7 +215,7 @@ public final class DcatAp11ToDkanBatch implements Component.Sequential {
                 || configuration.getPassword() == null
                 || configuration.getPassword().isEmpty()
                 ) {
-            throw exceptionFactory.failed("Missing required settings.");
+            throw exceptionFactory.failure("Missing required settings.");
         }
 
         Map<String, String> groups = getGroups();
@@ -255,7 +248,7 @@ public final class DcatAp11ToDkanBatch implements Component.Sequential {
                 LOG.debug("Creating group " + publisher_uri);
 
                 if (publisher_name == null || publisher_name.isEmpty()) {
-                    throw exceptionFactory.failed("Publisher has no name: " + publisher_uri);
+                    throw exceptionFactory.failure("Publisher has no name: " + publisher_uri);
                 }
 
                 HttpPost httpPost = new HttpPost(apiURI + "/node");
@@ -298,7 +291,7 @@ public final class DcatAp11ToDkanBatch implements Component.Sequential {
                                 response.close();
                             } catch (IOException e) {
                                 LOG.error(e.getLocalizedMessage(), e);
-                                throw exceptionFactory.failed("Error creating group");
+                                throw exceptionFactory.failure("Error creating group");
                             }
                         }
                     }
@@ -623,7 +616,7 @@ public final class DcatAp11ToDkanBatch implements Component.Sequential {
                             response.close();
                         } catch (IOException e) {
                             LOG.error(e.getLocalizedMessage(), e);
-                            throw exceptionFactory.failed("Error creating dataset");
+                            throw exceptionFactory.failure("Error creating dataset");
                         }
                     }
                 }
@@ -641,7 +634,7 @@ public final class DcatAp11ToDkanBatch implements Component.Sequential {
         }
 
         progressReport.done();
-        
+
     }
 
     private String executeSimpleSelectQuery(final String queryAsString, String bindingName) throws LpException {

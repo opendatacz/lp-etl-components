@@ -1,5 +1,5 @@
 define([], function () {
-    function controller($scope, rdfService) {
+    function controller($scope, $service, rdfService) {
 
         $scope.dialog = { };
 
@@ -26,8 +26,8 @@ define([], function () {
             }
         ];
 
-        $scope.setConfiguration = function (inConfig) {
-            rdf.setData(inConfig);
+        function loadDialog() {
+            rdf.setData($service.config.instance);
             var resource = rdf.secureByType('Configuration');
 
             $scope.dialog.apiUrl = rdf.getString(resource, 'apiUrl');
@@ -37,7 +37,7 @@ define([], function () {
             $scope.dialog.profile = rdf.getString(resource, 'profile') ;
         };
 
-        $scope.getConfiguration = function () {
+         function saveDialog() {
             var resource = rdf.secureByType('Configuration');
 
             rdf.setString(resource, 'apiUrl', $scope.dialog.apiUrl);
@@ -45,11 +45,16 @@ define([], function () {
             rdf.setString(resource, 'password', $scope.dialog.password);
             rdf.setString(resource, 'loadLanguage', $scope.dialog.loadLanguage);
             rdf.setString(resource, 'profile', $scope.dialog.profile);
-
-            return rdf.getData();
         };
+
+        $service.onStore = function () {
+            saveDialog();
+        };
+
+        // Load data.
+        loadDialog();
     }
     //
-    controller.$inject = ['$scope', 'services.rdf.0.0.0'];
+    controller.$inject = ['$scope', '$service', 'services.rdf.0.0.0'];
     return controller;
 });

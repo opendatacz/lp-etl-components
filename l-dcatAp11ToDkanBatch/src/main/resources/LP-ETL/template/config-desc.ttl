@@ -1,0 +1,5 @@
+@prefix config: <http://plugins.linkedpipes.com/ontology/configuration/> .
+
+<http://opendata.cz/resource/lp/etl/components/l-dcatAp11ToDkanBatch/0.0.0/configurationDesc>
+    a <http://plugins.linkedpipes.com/ontology/ConfigurationDescription> ;
+    config:type <http://plugins.linkedpipes.com/ontology/l-dcatAp11ToDkanBatch#Configuration> .
