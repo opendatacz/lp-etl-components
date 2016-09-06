@@ -10,8 +10,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.linkedpipes.etl.component.api.service.ProgressReport;
-import org.apache.http.ParseException;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -23,7 +21,6 @@ import org.apache.http.impl.client.LaxRedirectStrategy;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.openrdf.model.Value;
 import org.openrdf.model.vocabulary.DCTERMS;
@@ -159,7 +156,7 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
         apiURI = configuration.getApiUri();
 
         if (apiURI == null || apiURI.isEmpty() || configuration.getApiKey() == null || configuration.getApiKey().isEmpty() ) {
-            throw exceptionFactory.failed("Missing required settings.");
+            throw exceptionFactory.failure("Missing required settings.");
         }
 
         Map<String, String> organizations = getOrganizations();
@@ -248,7 +245,7 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
                 JSONObject root = new JSONObject();
 
                 if (publisher_name == null || publisher_name.isEmpty()) {
-                    throw exceptionFactory.failed("Organization has no name: " + publisher_uri);
+                    throw exceptionFactory.failure("Organization has no name: " + publisher_uri);
                 }
 
                 root.put("title", publisher_name);
@@ -280,11 +277,11 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
                     } else if (response.getStatusLine().getStatusCode() == 409) {
                         String ent = EntityUtils.toString(response.getEntity());
                         LOG.error("Organization conflict: " + ent);
-                        throw exceptionFactory.failed("Organization conflict: " + ent);
+                        throw exceptionFactory.failure("Organization conflict: " + ent);
                     } else {
                         String ent = EntityUtils.toString(response.getEntity());
                         LOG.error("Response:" + ent);
-                        throw exceptionFactory.failed("Error creating organization: " + ent);
+                        throw exceptionFactory.failure("Error creating organization: " + ent);
                     }
                 } catch (Exception e) {
                     LOG.error(e.getLocalizedMessage(), e);
@@ -294,7 +291,7 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
                             response.close();
                         } catch (IOException e) {
                             LOG.error(e.getLocalizedMessage(), e);
-                            throw exceptionFactory.failed("Error creating dataset");
+                            throw exceptionFactory.failure("Error creating dataset");
                         }
                     }
                 }
@@ -514,11 +511,11 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
                     } else if (response.getStatusLine().getStatusCode() == 409) {
                         String ent = EntityUtils.toString(response.getEntity());
                         LOG.error("Dataset already exists: " + ent);
-                        throw exceptionFactory.failed("Dataset already exists");
+                        throw exceptionFactory.failure("Dataset already exists");
                     } else {
                         String ent = EntityUtils.toString(response.getEntity());
                         LOG.error("Response:" + ent);
-                        throw exceptionFactory.failed("Error creating dataset");
+                        throw exceptionFactory.failure("Error creating dataset");
                     }
                 } catch (Exception e) {
                     LOG.error(e.getLocalizedMessage(), e);
@@ -528,7 +525,7 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
                             response.close();
                         } catch (IOException e) {
                             LOG.error(e.getLocalizedMessage(), e);
-                            throw exceptionFactory.failed("Error creating dataset");
+                            throw exceptionFactory.failure("Error creating dataset");
                         }
                     }
                 }
@@ -552,7 +549,7 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
                 } else {
                     String ent = EntityUtils.toString(response.getEntity());
                     LOG.error("Response:" + ent);
-                    throw exceptionFactory.failed("Error updating dataset");
+                    throw exceptionFactory.failure("Error updating dataset");
                 }
             } catch (Exception e) {
                 LOG.error(e.getLocalizedMessage(), e);
@@ -562,7 +559,7 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
                         response.close();
                     } catch (IOException e) {
                         LOG.error(e.getLocalizedMessage(), e);
-                        throw exceptionFactory.failed("Error updating dataset");
+                        throw exceptionFactory.failure("Error updating dataset");
                     }
                 }
             }
@@ -579,7 +576,7 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
         }
 
         progressReport.done();
-        
+
     }
 
     private String executeSimpleSelectQuery(final String queryAsString, String bindingName) throws LpException {
