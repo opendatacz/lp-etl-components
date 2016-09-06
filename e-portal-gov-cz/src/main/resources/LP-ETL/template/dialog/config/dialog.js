@@ -1,5 +1,5 @@
 define([], function () {
-    function controller($scope, rdfService) {
+    function controller($scope, $service, rdfService) {
 
         $scope.dialog = {
             'rewriteCache': '',
@@ -9,8 +9,8 @@ define([], function () {
 
         var rdf = rdfService.create('http://data.gov.cz/resource/lp/etl/components/e-portal-gov-cz/');
 
-        $scope.setConfiguration = function (inConfig) {
-            rdf.setData(inConfig);
+        function loadDialog() {
+            rdf.setData($service.config.instance);
             var resource = rdf.secureByType('Configuration');
 
             $scope.dialog.rewriteCache = rdf.getBoolean(resource, 'rewriteCache');
@@ -18,7 +18,7 @@ define([], function () {
             $scope.dialog.registry = rdf.getInteger(resource, 'registry');
         };
 
-        $scope.getConfiguration = function () {
+        function saveDialog() {
             var resource = rdf.secureByType('Configuration');
 
             rdf.setBoolean(resource, 'rewriteCache', $scope.dialog.rewriteCache);
@@ -27,8 +27,15 @@ define([], function () {
 
             return rdf.getData();
         };
+
+        $service.onStore = function () {
+            saveDialog();
+        };
+
+        // Load data.
+        loadDialog();
     }
     //
-    controller.$inject = ['$scope', 'services.rdf.0.0.0'];
+    controller.$inject = ['$scope', '$service', 'services.rdf.0.0.0'];
     return controller;
 });
