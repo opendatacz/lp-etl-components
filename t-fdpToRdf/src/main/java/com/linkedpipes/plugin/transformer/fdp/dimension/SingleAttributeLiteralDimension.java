@@ -1,5 +1,6 @@
 package com.linkedpipes.plugin.transformer.fdp.dimension;
 
+import java.io.IOException;
 import java.util.*;
 
 import com.linkedpipes.etl.component.api.service.ExceptionFactory;
@@ -70,7 +71,7 @@ public class SingleAttributeLiteralDimension extends FdpDimension {
 
     public SingleAttributeLiteralDimension(){}
 
-    public void processRow(IRI observation, HashMap<String, String> row, ExceptionFactory exceptionFactory) throws LpException {
+    public void processRow(IRI observation, HashMap<String, String> row, ExceptionFactory exceptionFactory) throws LpException, IOException {
         //if(attributes.size()>1) throw exceptionFactory.failed("Single attribute dimension {} has more than one attribute.", name);
         for(FdpAttribute attr : attributes) {
             String attrVal = row.get(attr.getColumn());

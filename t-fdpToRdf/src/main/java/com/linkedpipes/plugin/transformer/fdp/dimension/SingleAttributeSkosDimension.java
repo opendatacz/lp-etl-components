@@ -8,6 +8,7 @@ import com.linkedpipes.plugin.transformer.fdp.Mapper;
 import org.openrdf.model.IRI;
 import org.openrdf.model.Resource;
 
+import java.io.IOException;
 import java.util.HashMap;
 
 public class SingleAttributeSkosDimension extends FdpDimension {
@@ -55,7 +56,7 @@ public class SingleAttributeSkosDimension extends FdpDimension {
         return this.attributeQuery;
     }
 
-    public void processRow(IRI observation, HashMap<String, String> row, ExceptionFactory exceptionFactory) throws LpException {
+    public void processRow(IRI observation, HashMap<String, String> row, ExceptionFactory exceptionFactory) throws LpException, IOException {
         Resource dimensionVal = createValueIri(row);
             String attrVal = row.get(attributes.get(0).getColumn());
             if(attrVal != null) {

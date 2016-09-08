@@ -2,7 +2,8 @@
    "@graph": [
         {
             "@id": "http://localhost/resources/configuration",
-            "@type" : ["http://plugins.linkedpipes.com/ontology/t-fdpToRdf#Configuration"]
+            "@type" : ["http://plugins.linkedpipes.com/ontology/t-fdpToRdf#Configuration"],
+            "http://plugins.linkedpipes.com/ontology/t-fdpToRdf#fileName" : "data.ttl"
         }
 	]
 }

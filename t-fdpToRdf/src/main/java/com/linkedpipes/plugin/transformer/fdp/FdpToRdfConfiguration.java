@@ -11,12 +11,16 @@ public class FdpToRdfConfiguration {
     
     public FdpToRdfConfiguration() {
     }
-    
-    /*@RdfToPojo.Property(uri = FdpToRdfVocabulary.COLUMN_DEFS_QUERY)
-    private String columnDefsQuery = "";
-    
-    public String getColumnDefsQuery() {
-    	return columnDefsQuery;
-    }*/
+
+    @RdfToPojo.Property(uri = FdpToRdfVocabulary.HAS_FILE_NAME)
+    private String fileName;
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
 
 }

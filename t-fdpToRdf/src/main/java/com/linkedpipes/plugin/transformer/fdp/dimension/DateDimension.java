@@ -8,6 +8,7 @@ import com.linkedpipes.plugin.transformer.fdp.Mapper;
 import org.openrdf.model.IRI;
 import org.openrdf.model.Resource;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -62,7 +63,7 @@ public class DateDimension extends FdpDimension {
 
     public DateDimension(){}
 
-    public void processRow(IRI observation, HashMap<String, String> row, ExceptionFactory exceptionFactory) throws LpException {
+    public void processRow(IRI observation, HashMap<String, String> row, ExceptionFactory exceptionFactory) throws LpException, IOException {
         for(FdpAttribute attr : attributes) {
             String attrVal = row.get(attr.getColumn());
             String dateUri = null;

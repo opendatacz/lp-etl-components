@@ -9,6 +9,7 @@ import com.linkedpipes.plugin.transformer.fdp.Mapper;
 import com.linkedpipes.plugin.transformer.fdp.dimension.FdpDimension;
 import org.openrdf.model.IRI;
 
+import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -128,7 +129,7 @@ public class HierarchicalDimension extends FdpDimension {
 
     private IRI createAttrValIRI(FdpHierarchicalAttribute attr, String val) { return Mapper.VALUE_FACTORY.createIRI(datasetIri+"/"+attr.getName()+"/"+ urlEncode(val));}
 
-    public void processRow(IRI observation, HashMap<String, String> row, ExceptionFactory exceptionFactory) throws LpException {
+    public void processRow(IRI observation, HashMap<String, String> row, ExceptionFactory exceptionFactory) throws LpException, IOException {
         boolean dimensionValFound = false;
         int i=0;
         for(FdpHierarchicalAttribute attr : orderedAttributes) {

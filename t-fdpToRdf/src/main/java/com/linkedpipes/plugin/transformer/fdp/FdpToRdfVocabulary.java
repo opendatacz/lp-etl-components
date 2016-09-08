@@ -11,6 +11,8 @@ public final class FdpToRdfVocabulary {
 
     public static final String CONFIG = PREFIX + "Configuration";
 
+    public static final String HAS_FILE_NAME = PREFIX + "fileName";
+
     public static final String RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
     public static final String SKOS = "http://www.w3.org/2004/02/skos/core#";
     public static final String SCHEMA = "http://schema.org/";

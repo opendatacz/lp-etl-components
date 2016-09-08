@@ -1,5 +1,6 @@
 package com.linkedpipes.plugin.transformer.fdp.dimension;
 
+import java.io.IOException;
 import java.util.*;
 
 import com.linkedpipes.etl.component.api.service.ExceptionFactory;
@@ -72,7 +73,7 @@ public class SingleAttributeObjectDimension extends FdpDimension {
 
     public SingleAttributeObjectDimension(){}
 
-    public void processRow(IRI observation, HashMap<String, String> row, ExceptionFactory exceptionFactory) throws LpException {
+    public void processRow(IRI observation, HashMap<String, String> row, ExceptionFactory exceptionFactory) throws LpException, IOException {
         Resource dimensionVal = createValueIri(row);
         if(valueType!=null) output.submit(dimensionVal, Mapper.VALUE_FACTORY.createIRI(FdpToRdfVocabulary.A), valueType);
         for(FdpAttribute attr : attributes) {

@@ -1,6 +1,6 @@
 package com.linkedpipes.plugin.transformer.fdp;
 
-import java.io.UnsupportedEncodingException;
+import java.io.IOException;
 import java.util.*;
 
 import com.linkedpipes.plugin.transformer.fdp.dimension.FdpDimension;
@@ -25,7 +25,7 @@ public class Mapper {
     /**
      * Used output consumer.
      */
-    private final StatementConsumer consumer;
+    private final PlainTextTripleWriter consumer;
 
     /**
      * Row number in source file.
@@ -55,7 +55,7 @@ public class Mapper {
      * @param consumer
      * @param columns
      */
-    Mapper(StatementConsumer consumer, ExceptionFactory exceptionFactory, List<FdpDimension> dimensions,
+    Mapper(PlainTextTripleWriter consumer, ExceptionFactory exceptionFactory, List<FdpDimension> dimensions,
            List<FdpMeasure> measures, String datasetIri) {
         this.consumer = consumer;
         this.exceptionFactory = exceptionFactory;
@@ -82,9 +82,8 @@ public class Mapper {
      * @param row Row from the CSV file.
      * @return True if next line should be processed if it exists.
      */
-    public boolean onRow(List<String> row) throws UnsupportedEncodingException,
+    public boolean onRow(List<String> row) throws IOException,
             LpException {
-        consumer.onRowStart();
         rowNumber++;
 
         processedRowNumber++;
@@ -103,12 +102,14 @@ public class Mapper {
         for(FdpMeasure measure : measures) {
             measure.processRow(getObservationUri(), rowHash, exceptionFactory);
         }
-        consumer.submit(VALUE_FACTORY.createIRI(datasetIri), VALUE_FACTORY.createIRI(FdpToRdfVocabulary.QB_OBSERVATION),
-                getObservationUri());
-        consumer.submit(getObservationUri(), VALUE_FACTORY.createIRI(FdpToRdfVocabulary.A),
-                VALUE_FACTORY.createIRI(FdpToRdfVocabulary.QB_OBSERVATION_TYPE));
-        consumer.submit(getObservationUri(), VALUE_FACTORY.createIRI(FdpToRdfVocabulary.QB_DATASET),
-                VALUE_FACTORY.createIRI(datasetIri));
+
+            consumer.submit(VALUE_FACTORY.createIRI(datasetIri), VALUE_FACTORY.createIRI(FdpToRdfVocabulary.QB_OBSERVATION),
+                    getObservationUri());
+            consumer.submit(getObservationUri(), VALUE_FACTORY.createIRI(FdpToRdfVocabulary.A),
+                    VALUE_FACTORY.createIRI(FdpToRdfVocabulary.QB_OBSERVATION_TYPE));
+            consumer.submit(getObservationUri(), VALUE_FACTORY.createIRI(FdpToRdfVocabulary.QB_DATASET),
+                    VALUE_FACTORY.createIRI(datasetIri));
+
         return true;
     }
 

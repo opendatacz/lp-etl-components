@@ -4,6 +4,7 @@ import com.linkedpipes.etl.component.api.service.ExceptionFactory;
 import com.linkedpipes.etl.executor.api.v1.exception.LpException;
 import org.openrdf.model.*;
 
+import java.io.IOException;
 import java.util.HashMap;
 
 /**
@@ -14,7 +15,7 @@ public class FdpMeasure {
     private String measureProperty;
     private String column;
     private String file;
-    private StatementConsumer output;
+    private PlainTextTripleWriter output;
 
     public static final String query =
             "PREFIX qb: <http://purl.org/linked-data/cube#>\n" +
@@ -33,7 +34,7 @@ public class FdpMeasure {
             "      \t   qb:structure ?dsd .\n" +
             "}";
 
-    public FdpMeasure(StatementConsumer output, double factor, String measureProperty, String column, String file) {
+    public FdpMeasure(PlainTextTripleWriter output, double factor, String measureProperty, String column, String file) {
         this.factor = factor;
         this.measureProperty = measureProperty;
         this.column = column;
@@ -41,7 +42,7 @@ public class FdpMeasure {
         this.output = output;
     }
 
-    public void processRow(IRI observationIri, HashMap<String, String> row, ExceptionFactory exceptionFactory) throws LpException {
+    public void processRow(IRI observationIri, HashMap<String, String> row, ExceptionFactory exceptionFactory) throws LpException, IOException {
         String measureValString = row.get(column);
         if(measureValString != null) {
             try {

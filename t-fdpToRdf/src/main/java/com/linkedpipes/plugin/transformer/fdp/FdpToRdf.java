@@ -5,6 +5,7 @@ import com.linkedpipes.etl.dataunit.sesame.api.rdf.WritableSingleGraphDataUnit;
 import com.linkedpipes.etl.dataunit.system.api.files.FilesDataUnit;
 import com.linkedpipes.etl.dataunit.system.api.files.FilesDataUnit.Entry;
 
+import com.linkedpipes.etl.dataunit.system.api.files.WritableFilesDataUnit;
 import com.linkedpipes.plugin.transformer.fdp.dimension.*;
 import org.openrdf.model.*;
 import org.openrdf.query.*;
@@ -12,6 +13,8 @@ import org.openrdf.model.impl.SimpleValueFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.*;
+import java.nio.charset.Charset;
 import java.util.*;
 
 import com.linkedpipes.etl.component.api.Component;
@@ -25,8 +28,10 @@ import org.openrdf.query.impl.SimpleDataset;
  * @author Škoda Petr
  */
 public final class FdpToRdf implements Component.Sequential {
-	
-	private static final ValueFactory VALUE_FACTORY
+
+    private static final String FILE_ENCODE = "UTF-8";
+
+    private static final ValueFactory VALUE_FACTORY
     = SimpleValueFactory.getInstance();
 
     private static final Logger LOG
@@ -38,8 +43,11 @@ public final class FdpToRdf implements Component.Sequential {
     @Component.InputPort(id = "InputFiles")
     public FilesDataUnit inputFilesDataUnit;
 
-    @Component.InputPort(id = "OutputRdf")
-    public WritableSingleGraphDataUnit outputRdf;
+    /*@Component.InputPort(id = "OutputRdf")*/
+    //public WritableSingleGraphDataUnit outputRdf;
+
+    @Component.OutputPort(id = "OutputFile")
+    public WritableFilesDataUnit outputFiles;
 
     @Component.Configuration
     public FdpToRdfConfiguration configuration;
@@ -47,7 +55,7 @@ public final class FdpToRdf implements Component.Sequential {
     @Component.Inject
     public ExceptionFactory exceptionFactory;
     
-    private BufferedOutput output;
+    private PlainTextTripleWriter output;
     
     private List<FdpDimension> dimensions = new ArrayList<FdpDimension>();
     private List<HierarchicalDimension> hierarchicalDimensions = new ArrayList<HierarchicalDimension>();
@@ -210,8 +218,20 @@ public final class FdpToRdf implements Component.Sequential {
 
     @Override
     public void execute() throws LpException {
-        
-        output = new BufferedOutput(outputRdf);
+
+        // changing to plaintext output
+        //output = new BufferedOutput(outputRdf);
+        final File outputFile = outputFiles.createFile(configuration.getFileName()).toFile();
+        try {
+            //FileOutputStream outStream = new FileOutputStream(outputFile);
+            //OutputStreamWriter outWriter = new OutputStreamWriter(outStream, Charset.forName(FILE_ENCODE));
+            FileWriter outWriter = new FileWriter(outputFile);
+            output = new PlainTextTripleWriter(outWriter);
+        }
+        catch (IOException ex){
+            throw exceptionFactory.failed("Can't initialize file for data output.", ex);
+        }
+
         final Parser parser = new Parser(exceptionFactory);
         // TODO We could use some table group URI from user?
 
@@ -224,7 +244,7 @@ public final class FdpToRdf implements Component.Sequential {
         allDimensions.addAll(hierarchicalDimensions);
         final Mapper mapper = new Mapper(output, exceptionFactory, allDimensions, measures, datasetIRI);
         
-        output.onFileStart();
+        //output.onFileStart();
 
         if(inputFilesDataUnit.size() > 1) throw exceptionFactory.failed("Only one CSV file is supported at the moment.");
         for (Entry entry : inputFilesDataUnit) {
@@ -235,8 +255,12 @@ public final class FdpToRdf implements Component.Sequential {
                 throw exceptionFactory.failed("Can't process file: {}",
                         entry.getFileName(), ex);
             }
-            mapper.onTableEnd();
+        }
+        mapper.onTableEnd();
+        try {
             output.onFileEnd();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
