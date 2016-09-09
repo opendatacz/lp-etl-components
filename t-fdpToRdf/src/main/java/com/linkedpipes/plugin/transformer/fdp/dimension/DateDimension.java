@@ -72,7 +72,7 @@ public class DateDimension extends FdpDimension {
                 else if(attrVal.matches("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$")) dateUri = "http://reference.data.gov.uk/id/gregorian-interval/"+attrVal;
                 else if(attrVal.matches("^\\d{4}-\\d{2}$")) dateUri = "http://reference.data.gov.uk/id/gregorian-month/"+attrVal;
                 else if(attrVal.matches("^\\d{4}$")) dateUri = "http://reference.data.gov.uk/id/gregorian-year/"+attrVal;
-                else throw exceptionFactory.failed("Date value {} in column {}, dimension {} is not in xs:date/xs:dateTime format.", attrVal, attr.getColumn(), name);
+                else throw exceptionFactory.failure("Date value {} in column {}, dimension {} is not in xs:date/xs:dateTime format.", attrVal, attr.getColumn(), name);
 
                 if(dateUri != null) {
                     output.submit(observation, this.valueProperty, Mapper.VALUE_FACTORY.createIRI(dateUri));

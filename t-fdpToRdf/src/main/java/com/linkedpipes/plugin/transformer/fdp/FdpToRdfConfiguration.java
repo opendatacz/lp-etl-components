@@ -2,13 +2,9 @@ package com.linkedpipes.plugin.transformer.fdp;
 
 import com.linkedpipes.etl.component.api.service.RdfToPojo;
 
-/**
- *
- * @author Škoda Petr
- */
 @RdfToPojo.Type(uri = FdpToRdfVocabulary.CONFIG)
 public class FdpToRdfConfiguration {
-    
+
     public FdpToRdfConfiguration() {
     }
 

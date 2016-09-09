@@ -1,9 +1,5 @@
 package com.linkedpipes.plugin.transformer.fdp;
 
-/**
- *
- * @author Škoda Petr
- */
 public final class FdpToRdfVocabulary {
 
     private static final String PREFIX

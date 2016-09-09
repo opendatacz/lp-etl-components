@@ -23,10 +23,6 @@ import com.linkedpipes.etl.executor.api.v1.exception.LpException;
 
 import org.openrdf.query.impl.SimpleDataset;
 
-/**
- *
- * @author Škoda Petr
- */
 public final class FdpToRdf implements Component.Sequential {
 
     private static final String FILE_ENCODE = "UTF-8";
@@ -93,16 +89,16 @@ public final class FdpToRdf implements Component.Sequential {
     	});
     	}
     	catch(Exception ex) {
-    		 throw exceptionFactory.failed("Can't extract metadata, the failed query was: \r\n {}", queryText);
+    		 throw exceptionFactory.failure("Can't extract metadata, the failure query was: \r\n {}", queryText);
     	}
     	return currentResult;
     }
 
     private void extractDataset() throws LpException {
         execQuery(FdpMeasure.query);
-        if(currentResult.size() == 0) throw exceptionFactory.failed("Dataset IRI not found in metadata.");
+        if(currentResult.size() == 0) throw exceptionFactory.failure("Dataset IRI not found in metadata.");
         Binding datasetBinding = currentResult.get(0).getBinding("dataset");
-        if(datasetBinding == null) throw exceptionFactory.failed("Dataset IRI not found in metadata.");
+        if(datasetBinding == null) throw exceptionFactory.failure("Dataset IRI not found in metadata.");
         datasetIRI = datasetBinding.getValue().stringValue();
     }
     
@@ -229,7 +225,7 @@ public final class FdpToRdf implements Component.Sequential {
             output = new PlainTextTripleWriter(outWriter);
         }
         catch (IOException ex){
-            throw exceptionFactory.failed("Can't initialize file for data output.", ex);
+            throw exceptionFactory.failure("Can't initialize file for data output.", ex);
         }
 
         final Parser parser = new Parser(exceptionFactory);
@@ -246,13 +242,13 @@ public final class FdpToRdf implements Component.Sequential {
         
         //output.onFileStart();
 
-        if(inputFilesDataUnit.size() > 1) throw exceptionFactory.failed("Only one CSV file is supported at the moment.");
+        if(inputFilesDataUnit.size() > 1) throw exceptionFactory.failure("Only one CSV file is supported at the moment.");
         for (Entry entry : inputFilesDataUnit) {
             LOG.info("Processing file: {}", entry.toFile());
             try {
                 parser.parse(entry, mapper);
             } catch (Exception ex) {
-                throw exceptionFactory.failed("Can't process file: {}",
+                throw exceptionFactory.failure("Can't process file: {}",
                         entry.getFileName(), ex);
             }
         }
