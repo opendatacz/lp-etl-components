@@ -73,4 +73,13 @@
         </plugins>
     </build>
 
+    <profiles>
+        <profile>
+            <id>otherOutputDir</id>
+            <build>
+                <directory>C:\apps\etl-devel3\etl\deploy\jars\t-fdpToRdf</directory>
+            </build>
+        </profile>
+    </profiles>
+
 </project>

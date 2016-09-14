@@ -1,1 +1,1 @@
-This t-FdpToRdf.zip contains compiled component. You can deploy it to an existing LP-ETL by extracting the t-FdpToRdf folder into <LP-ETL-DIR>/deploy/components/ and restarting LP-ETL.
+This t-FdpToRdf.zip contains compiled component. You can deploy it to an existing LP-ETL by extracting the t-FdpToRdf folder into /deploy/jars/ and restarting LP-ETL.
