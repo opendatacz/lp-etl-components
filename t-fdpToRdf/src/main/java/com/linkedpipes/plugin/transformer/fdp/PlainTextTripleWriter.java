@@ -1,9 +1,7 @@
 package com.linkedpipes.plugin.transformer.fdp;
 
-import org.openrdf.model.IRI;
-import org.openrdf.model.Literal;
-import org.openrdf.model.Resource;
-import org.openrdf.model.Value;
+import org.openrdf.model.*;
+import org.openrdf.model.impl.SimpleValueFactory;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -12,6 +10,9 @@ import java.io.OutputStreamWriter;
  * Created by admin on 2.9.2016.
  */
 public class PlainTextTripleWriter {
+
+    private final static ValueFactory VALUE_FACTORY
+            = SimpleValueFactory.getInstance();
 
     OutputStreamWriter outWriter;
 
@@ -36,13 +37,19 @@ public class PlainTextTripleWriter {
 
     public void submit(Resource subject, IRI predicate, Value object) throws IOException {
         writeTriple(subjectPredicatePart(subject,predicate), bracketedUri(object));
+
+        //Statement statement = VALUE_FACTORY.createStatement(subject, predicate, object);
+        //outWriter.write(statement.getObject().toString()+"\r\n");
     }
 
     public void submit(Resource subject, IRI predicate, Literal object) throws IOException {
+        writeTriple(subjectPredicatePart(subject, predicate), object.toString());
+
+        /*
         if( object.getDatatype().getLocalName().compareToIgnoreCase("string") == 0 ) {
-            writeTriple(subjectPredicatePart(subject, predicate), stringLiteralToString(object));
+
         }
-        else writeTriple(subjectPredicatePart(subject, predicate), object.stringValue());
+        else writeTriple(subjectPredicatePart(subject, predicate), object.stringValue());*/
     }
 
     public void onFileEnd() throws IOException {

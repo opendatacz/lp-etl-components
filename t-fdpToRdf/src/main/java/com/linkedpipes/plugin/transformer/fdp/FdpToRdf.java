@@ -7,6 +7,7 @@ import com.linkedpipes.etl.dataunit.system.api.files.FilesDataUnit.Entry;
 
 import com.linkedpipes.etl.dataunit.system.api.files.WritableFilesDataUnit;
 import com.linkedpipes.plugin.transformer.fdp.dimension.*;
+import org.apache.commons.io.IOUtils;
 import org.openrdf.model.*;
 import org.openrdf.query.*;
 import org.openrdf.model.impl.SimpleValueFactory;
@@ -64,6 +65,7 @@ public final class FdpToRdf implements Component.Sequential {
     }
 
     private String datasetIRI;
+    private String packageName;
     
     private List<BindingSet> execQuery(String queryText) throws LpException {
     	try{
@@ -98,8 +100,10 @@ public final class FdpToRdf implements Component.Sequential {
         execQuery(FdpMeasure.query);
         if(currentResult.size() == 0) throw exceptionFactory.failure("Dataset IRI not found in metadata.");
         Binding datasetBinding = currentResult.get(0).getBinding("dataset");
+        Binding packageNameBinding = currentResult.get(0).getBinding("packageName");
         if(datasetBinding == null) throw exceptionFactory.failure("Dataset IRI not found in metadata.");
         datasetIRI = datasetBinding.getValue().stringValue();
+        packageName = packageNameBinding.getValue().stringValue();
     }
     
     private void extractDimensions() throws LpException {
@@ -212,16 +216,20 @@ public final class FdpToRdf implements Component.Sequential {
         if(bs.getBinding("rdfType")!=null) dimension.setValueType((IRI) bs.getBinding("rdfType").getValue());
     }
 
+    private FileOutputStream outputStream;
     @Override
     public void execute() throws LpException {
 
         // changing to plaintext output
         //output = new BufferedOutput(outputRdf);
-        final File outputFile = outputFiles.createFile(configuration.getFileName()).toFile();
+        extractDataset();
+
+        final File outputFile = outputFiles.createFile(packageName+".nt").toFile();
         try {
             //FileOutputStream outStream = new FileOutputStream(outputFile);
             //OutputStreamWriter outWriter = new OutputStreamWriter(outStream, Charset.forName(FILE_ENCODE));
-            FileWriter outWriter = new FileWriter(outputFile);
+            outputStream = new FileOutputStream(outputFile);
+            OutputStreamWriter outWriter = new OutputStreamWriter(outputStream, Charset.forName("UTF-8").newEncoder());//new FileWriter(outputFile, );
             output = new PlainTextTripleWriter(outWriter);
         }
         catch (IOException ex){
@@ -229,9 +237,7 @@ public final class FdpToRdf implements Component.Sequential {
         }
 
         final Parser parser = new Parser(exceptionFactory);
-        // TODO We could use some table group URI from user?
-
-        extractDataset();
+        
         extractDimensions();
         extractAttributes();
         extractMeasures();
@@ -242,16 +248,22 @@ public final class FdpToRdf implements Component.Sequential {
         
         //output.onFileStart();
 
-        if(inputFilesDataUnit.size() > 1) throw exceptionFactory.failure("Only one CSV file is supported at the moment.");
+        if(inputFilesDataUnit.size() > 2) throw exceptionFactory.failure("Only one CSV file is supported at the moment.");
         for (Entry entry : inputFilesDataUnit) {
             LOG.info("Processing file: {}", entry.toFile());
             try {
-                parser.parse(entry, mapper);
+                if(!entry.getFileName().endsWith(".nt")) parser.parse(entry, mapper);
+                else if(entry.getFileName().endsWith(".nt")) {
+                    FileInputStream fileInputStream = new FileInputStream(entry.toFile());
+                    IOUtils.copy(fileInputStream, outputStream);
+                    fileInputStream.close();
+                }
             } catch (Exception ex) {
                 throw exceptionFactory.failure("Can't process file: {}",
                         entry.getFileName(), ex);
             }
         }
+
         mapper.onTableEnd();
         try {
             output.onFileEnd();

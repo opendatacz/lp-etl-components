@@ -5,6 +5,7 @@ import com.linkedpipes.etl.executor.api.v1.exception.LpException;
 import org.openrdf.model.*;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.HashMap;
 
 /**
@@ -31,6 +32,7 @@ public class FdpMeasure {
             "  \t\t\t\t\t  fdprdf:sourceFile ?sourceFile ] .\n" +
             "                        \n" +
             "  ?dataset a qb:DataSet;\n" +
+            "      fdprdf:datasetShortName ?packageName ;\n" +
             "      \t   qb:structure ?dsd .\n" +
             "}";
 
@@ -46,10 +48,10 @@ public class FdpMeasure {
         String measureValString = row.get(column);
         if(measureValString != null) {
             try {
-                double measureVal = Double.parseDouble(measureValString) * this.factor;
+                BigDecimal measureVal = new BigDecimal(Double.parseDouble(measureValString) * this.factor);
                 output.submit(observationIri,
                         Mapper.VALUE_FACTORY.createIRI(measureProperty),
-                        Mapper.VALUE_FACTORY.createLiteral(measureVal));
+                        Mapper.VALUE_FACTORY. createLiteral(measureVal));
             }
             catch(NumberFormatException nfe) {
                 output.submit(observationIri,
