@@ -29,17 +29,13 @@ class Parser {
 
     private final ExceptionFactory exceptionFactory;
     
-    private final CsvPreference csvPreference;
+    //private final CsvPreference csvPreference;
 
     Parser(ExceptionFactory exceptionFactory) {
-            csvPreference = new CsvPreference.Builder(
-            		'\"',
-            		',',
-                    "\\n").build();
             this.exceptionFactory = exceptionFactory;
     }
 
-    public void parse(FilesDataUnit.Entry entry, Mapper mapper)
+    public void parse(FilesDataUnit.Entry entry, Mapper mapper, CsvPreference csvPreference)
             throws UnsupportedEncodingException, IOException, LpException {
         try (final FileInputStream fileInputStream
                 = new FileInputStream(entry.toFile());

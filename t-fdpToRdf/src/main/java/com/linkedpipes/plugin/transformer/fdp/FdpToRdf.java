@@ -23,6 +23,7 @@ import com.linkedpipes.etl.component.api.service.ExceptionFactory;
 import com.linkedpipes.etl.executor.api.v1.exception.LpException;
 
 import org.openrdf.query.impl.SimpleDataset;
+import org.supercsv.prefs.CsvPreference;
 
 public final class FdpToRdf implements Component.Sequential {
 
@@ -104,6 +105,17 @@ public final class FdpToRdf implements Component.Sequential {
         if(datasetBinding == null) throw exceptionFactory.failure("Dataset IRI not found in metadata.");
         datasetIRI = datasetBinding.getValue().stringValue();
         packageName = packageNameBinding.getValue().stringValue();
+    }
+
+    private CsvPreference extractHeader(String resourcePath) throws LpException {
+        execQuery(HeaderParser.resourceQuery(resourcePath));
+        if(currentResult.size() ==0) throw exceptionFactory.failure("Cannot read resource schema.");
+        Binding delimiterBinding = currentResult.get(0).getBinding("delimiter");
+        Binding quoteCharBinding = currentResult.get(0).getBinding("quoteChar");
+        HeaderParser headerParser = new HeaderParser();
+        if(delimiterBinding != null) headerParser.setDelimiter(delimiterBinding.getValue().stringValue());
+        if(quoteCharBinding != null) headerParser.setQuoteChar(quoteCharBinding.getValue().stringValue());
+        return headerParser.getCsvPreference();
     }
     
     private void extractDimensions() throws LpException {
@@ -237,7 +249,7 @@ public final class FdpToRdf implements Component.Sequential {
         }
 
         final Parser parser = new Parser(exceptionFactory);
-        
+
         extractDimensions();
         extractAttributes();
         extractMeasures();
@@ -250,9 +262,12 @@ public final class FdpToRdf implements Component.Sequential {
 
         if(inputFilesDataUnit.size() > 2) throw exceptionFactory.failure("Only one CSV file is supported at the moment.");
         for (Entry entry : inputFilesDataUnit) {
+
             LOG.info("Processing file: {}", entry.toFile());
             try {
-                if(!entry.getFileName().endsWith(".nt")) parser.parse(entry, mapper);
+                if(!entry.getFileName().endsWith(".nt")) {
+                    parser.parse(entry, mapper, extractHeader(entry.getFileName()));
+                }
                 else if(entry.getFileName().endsWith(".nt")) {
                     FileInputStream fileInputStream = new FileInputStream(entry.toFile());
                     IOUtils.copy(fileInputStream, outputStream);
