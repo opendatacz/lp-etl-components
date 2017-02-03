@@ -174,11 +174,16 @@ public final class FdpToRdf implements Component.Sequential {
     private void extractMeasures() throws LpException {
         execQuery(FdpMeasure.query);
         for(BindingSet bs : currentResult) {
-            measures.add(new FdpMeasure(output,
+            FdpMeasure newMeasure = new FdpMeasure(output,
                     ((Literal)bs.getBinding("measureFactor").getValue()).doubleValue(),
                     bs.getBinding("measureProperty").getValue().stringValue(),
                     bs.getBinding("sourceColumn").getValue().stringValue(),
-                    bs.getBinding("sourceFile").getValue().stringValue()));
+                    bs.getBinding("sourceFile").getValue().stringValue());
+            Binding decimalCharBinding = bs.getBinding("decimalChar");
+            Binding groupCharBinding = bs.getBinding("groupChar");
+            if(decimalCharBinding != null) newMeasure.setDecimalSep(decimalCharBinding.getValue().stringValue().charAt(0));
+            if(groupCharBinding != null) newMeasure.setGroupSep(groupCharBinding.getValue().stringValue().charAt(0));
+            measures.add(newMeasure);
         }
     }
     

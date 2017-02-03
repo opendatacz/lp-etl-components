@@ -1,6 +1,9 @@
 package com.linkedpipes.plugin.transformer.fdp;
 
 import java.io.UnsupportedEncodingException;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import org.openrdf.model.Resource;
@@ -12,15 +15,19 @@ import com.linkedpipes.etl.executor.api.v1.exception.LpException;
 
 public class FdpAttribute {
 	//private String name;
+    public enum Format {NUMBER, DATE, UNDEFINED}
+    private Format format = Format.UNDEFINED;
 	private String sourceColumn;
 	private String sourceFile;
+    private char decimalSep = '.';
+    private char groupSep = ' ';
 	private boolean bIsKey;
 	private Resource partialPropertyIri;
 	public Resource getPartialPropertyIri(){
 		return partialPropertyIri; // Mapper.VALUE_FACTORY.createIri(partialPropertyIri);
 	}
 	public boolean isKey() {return bIsKey;}
-	public String getColumn() {return sourceColumn;} 
+	public String getColumn() {return sourceColumn;}
 	public FdpAttribute(String sourceColumn, String sourceFile, boolean isKey, Resource propertyIri) {
 		//this.name = name;
 		this.sourceColumn = sourceColumn;
@@ -28,4 +35,37 @@ public class FdpAttribute {
 		this.bIsKey = isKey;
 		this.partialPropertyIri = propertyIri;
 	}
+	public void setFormat(String format) {
+		if(format.equals("number")) this.format = Format.NUMBER;
+        else this.format = Format.UNDEFINED;
+	}
+
+	public void setFormat(Format valueFormat) {
+	    this.format = valueFormat;
+    }
+
+	public void setDecimalSep(char decimalSep) {
+	    this.decimalSep = decimalSep;
+    }
+    public void setGroupSep(char groupSep) {
+        this.groupSep = groupSep;
+    }
+	public Object parseValue(String value) {
+        Object result = null;
+	    switch(this.format) {
+            case NUMBER: {
+                DecimalFormat df = new DecimalFormat();
+                DecimalFormatSymbols symbols = new DecimalFormatSymbols();
+                symbols.setDecimalSeparator(decimalSep);
+                symbols.setGroupingSeparator(groupSep);
+                df.setDecimalFormatSymbols(symbols);
+                try {
+                    result = df.parse(value).doubleValue();
+                } catch (Exception e) {
+                    result = null;
+                }
+            } break;
+        }
+        return result;
+    }
 }
