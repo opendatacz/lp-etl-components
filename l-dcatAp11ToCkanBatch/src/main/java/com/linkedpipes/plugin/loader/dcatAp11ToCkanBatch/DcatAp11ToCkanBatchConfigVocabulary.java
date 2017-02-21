@@ -1,9 +1,5 @@
 package com.linkedpipes.plugin.loader.dcatAp11ToCkanBatch;
 
-/**
- *
- * @author Klímek Jakub
- */
 public class DcatAp11ToCkanBatchConfigVocabulary {
 
     private static final String PREFIX = "http://plugins.linkedpipes.com/ontology/l-dcatAp11ToCkanBatch#";

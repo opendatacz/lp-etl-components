@@ -1,31 +1,37 @@
 package com.linkedpipes.plugin.transformer.fdp;
 
-import com.linkedpipes.etl.dataunit.sesame.api.rdf.SingleGraphDataUnit;
-import com.linkedpipes.etl.dataunit.sesame.api.rdf.WritableSingleGraphDataUnit;
-import com.linkedpipes.etl.dataunit.system.api.files.FilesDataUnit;
-import com.linkedpipes.etl.dataunit.system.api.files.FilesDataUnit.Entry;
 
-import com.linkedpipes.etl.dataunit.system.api.files.WritableFilesDataUnit;
+import com.linkedpipes.etl.dataunit.core.files.FilesDataUnit;
+import com.linkedpipes.etl.dataunit.core.files.FilesDataUnit.Entry;
+import com.linkedpipes.etl.dataunit.core.files.WritableFilesDataUnit;
+import com.linkedpipes.etl.dataunit.core.rdf.SingleGraphDataUnit;
+import com.linkedpipes.etl.executor.api.v1.LpException;
+import com.linkedpipes.etl.executor.api.v1.component.Component;
+import com.linkedpipes.etl.executor.api.v1.component.SequentialExecution;
+import com.linkedpipes.etl.executor.api.v1.service.ExceptionFactory;
 import com.linkedpipes.plugin.transformer.fdp.dimension.*;
 import org.apache.commons.io.IOUtils;
-import org.openrdf.model.*;
-import org.openrdf.query.*;
-import org.openrdf.model.impl.SimpleValueFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.charset.Charset;
 import java.util.*;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Literal;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.query.Binding;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.QueryLanguage;
+import org.eclipse.rdf4j.query.TupleQuery;
+import org.eclipse.rdf4j.query.TupleQueryResult;
+import org.eclipse.rdf4j.query.impl.SimpleDataset;
 
-import com.linkedpipes.etl.component.api.Component;
-import com.linkedpipes.etl.component.api.service.ExceptionFactory;
-import com.linkedpipes.etl.executor.api.v1.exception.LpException;
-
-import org.openrdf.query.impl.SimpleDataset;
 import org.supercsv.prefs.CsvPreference;
 
-public final class FdpToRdf implements Component.Sequential {
+public final class FdpToRdf implements Component, SequentialExecution {
 
     private static final String FILE_ENCODE = "UTF-8";
 
@@ -35,16 +41,16 @@ public final class FdpToRdf implements Component.Sequential {
     private static final Logger LOG
             = LoggerFactory.getLogger(FdpToRdf.class);
 
-    @Component.InputPort(id = "InputRdf")
+    @Component.InputPort(iri = "InputRdf")
     public SingleGraphDataUnit inputRdf;
 
-    @Component.InputPort(id = "InputFiles")
+    @Component.InputPort(iri = "InputFiles")
     public FilesDataUnit inputFilesDataUnit;
 
     /*@Component.InputPort(id = "OutputRdf")*/
     //public WritableSingleGraphDataUnit outputRdf;
 
-    @Component.OutputPort(id = "OutputFile")
+    @Component.OutputPort(iri = "OutputFile")
     public WritableFilesDataUnit outputFiles;
 
     @Component.Configuration
@@ -52,32 +58,32 @@ public final class FdpToRdf implements Component.Sequential {
 
     @Component.Inject
     public ExceptionFactory exceptionFactory;
-    
+
     private PlainTextTripleWriter output;
-    
+
     private List<FdpDimension> dimensions = new ArrayList<FdpDimension>();
     private List<HierarchicalDimension> hierarchicalDimensions = new ArrayList<HierarchicalDimension>();
     private List<FdpMeasure> measures = new ArrayList<FdpMeasure>();
-    
+
     private List<BindingSet> currentResult = null;
-    
+
     public void storeCurrentResult(List<BindingSet> result) {
     	currentResult = result;
     }
 
     private String datasetIRI;
     private String packageName;
-    
+
     private List<BindingSet> execQuery(String queryText) throws LpException {
     	try{
     	inputRdf.execute((connection) -> {
-        	
+
     		//String queryText = "PREFIX fdprdf: <http://data.openbudgets.eu/fdptordf#> SELECT ?attribute ?valueProp ?parentDimension WHERE { ?attribute fdprdf:valueProperty ?valueProp; fdprdf:parentDimension ?parentDimension . }";
-        
+
             final TupleQuery query = connection.prepareTupleQuery(
             		QueryLanguage.SPARQL, queryText);
             final SimpleDataset dataset = new SimpleDataset();
-            final IRI inputGraph = inputRdf.getGraph();
+            final IRI inputGraph = inputRdf.getReadGraph();
             dataset.addDefaultGraph(inputGraph);
             // We need to add this else we can not use
             // GRAPH ?g in query.
@@ -117,7 +123,7 @@ public final class FdpToRdf implements Component.Sequential {
         if(quoteCharBinding != null) headerParser.setQuoteChar(quoteCharBinding.getValue().stringValue());
         return headerParser.getCsvPreference();
     }
-    
+
     private void extractDimensions() throws LpException {
 
        execQuery(MultiAttributeDimension.dimensionQuery);
@@ -186,7 +192,7 @@ public final class FdpToRdf implements Component.Sequential {
             measures.add(newMeasure);
         }
     }
-    
+
     private void extractAttributes() throws LpException {
     	for(FdpDimension dim : dimensions) {
     		List<FdpAttribute> attributes = new ArrayList<FdpAttribute>();
@@ -199,7 +205,7 @@ public final class FdpToRdf implements Component.Sequential {
                 		(Resource) bs.getBinding("attributeValueProperty").getValue());
                 attributes.add(attr);
     		}
-    		dim.setAttributes(attributes);                
+    		dim.setAttributes(attributes);
     	}
         for(HierarchicalDimension dim : hierarchicalDimensions) {
             List<FdpAttribute> attributes = new ArrayList<FdpAttribute>();
@@ -223,7 +229,7 @@ public final class FdpToRdf implements Component.Sequential {
         }
 
     }
-    
+
     private void initDimension(FdpDimension dimension, BindingSet bs) {
         IRI valueProp = (IRI) bs.getBinding("dimensionProp").getValue();
         String dimName = (String) bs.getBinding("dimensionName").getValue().stringValue();
@@ -241,7 +247,7 @@ public final class FdpToRdf implements Component.Sequential {
         //output = new BufferedOutput(outputRdf);
         extractDataset();
 
-        final File outputFile = outputFiles.createFile(packageName+".nt").toFile();
+        final File outputFile = outputFiles.createFile(packageName+".nt");
         try {
             //FileOutputStream outStream = new FileOutputStream(outputFile);
             //OutputStreamWriter outWriter = new OutputStreamWriter(outStream, Charset.forName(FILE_ENCODE));
@@ -262,7 +268,7 @@ public final class FdpToRdf implements Component.Sequential {
         allDimensions.addAll(dimensions);
         allDimensions.addAll(hierarchicalDimensions);
         final Mapper mapper = new Mapper(output, exceptionFactory, allDimensions, measures, datasetIRI);
-        
+
         //output.onFileStart();
 
         if(inputFilesDataUnit.size() > 2) throw exceptionFactory.failure("Only one CSV file is supported at the moment.");

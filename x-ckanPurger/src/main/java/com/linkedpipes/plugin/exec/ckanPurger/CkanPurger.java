@@ -1,11 +1,15 @@
 package com.linkedpipes.plugin.exec.ckanPurger;
 
+import com.linkedpipes.etl.executor.api.v1.LpException;
+import com.linkedpipes.etl.executor.api.v1.component.Component;
+import com.linkedpipes.etl.executor.api.v1.component.SequentialExecution;
+import com.linkedpipes.etl.executor.api.v1.service.ExceptionFactory;
+import com.linkedpipes.etl.executor.api.v1.service.ProgressReport;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.linkedpipes.etl.component.api.service.ProgressReport;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -21,15 +25,8 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.linkedpipes.etl.component.api.Component;
-import com.linkedpipes.etl.component.api.service.ExceptionFactory;
-import com.linkedpipes.etl.executor.api.v1.exception.LpException;
 
-/**
- *
- * @author Klímek Jakub
- */
-public final class CkanPurger implements Component.Sequential {
+public final class CkanPurger implements Component, SequentialExecution {
 
     private static final Logger LOG = LoggerFactory.getLogger(CkanPurger.class);
 

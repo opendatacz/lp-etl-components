@@ -1,9 +1,5 @@
 package com.linkedpipes.plugin.exec.dkanPurger;
 
-/**
- *
- * @author Klímek Jakub
- */
 public class DkanPurgerConfigVocabulary {
 
     private static final String PREFIX = "http://plugins.linkedpipes.com/ontology/x-dkanPurger#";

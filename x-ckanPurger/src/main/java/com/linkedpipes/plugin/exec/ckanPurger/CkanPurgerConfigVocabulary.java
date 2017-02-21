@@ -1,9 +1,5 @@
 package com.linkedpipes.plugin.exec.ckanPurger;
 
-/**
- *
- * @author Klímek Jakub
- */
 public class CkanPurgerConfigVocabulary {
 
     private static final String PREFIX = "http://plugins.linkedpipes.com/ontology/x-ckanPurger#";

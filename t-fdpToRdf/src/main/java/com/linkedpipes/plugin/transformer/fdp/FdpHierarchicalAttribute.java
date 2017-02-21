@@ -1,6 +1,7 @@
 package com.linkedpipes.plugin.transformer.fdp;
 
-import org.openrdf.model.Resource;
+import org.eclipse.rdf4j.model.Resource;
+
 
 /**
  * Created by admin on 22.8.2016.

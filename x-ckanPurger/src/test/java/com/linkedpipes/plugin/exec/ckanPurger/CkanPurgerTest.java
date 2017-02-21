@@ -1,22 +1,16 @@
 package com.linkedpipes.plugin.exec.ckanPurger;
 
-import org.junit.Test;
-import org.openrdf.rio.RDFFormat;
 
-import com.linkedpipes.etl.component.test.TestEnvironment;
-import com.linkedpipes.etl.component.test.TestUtils;
+import com.linkedpipes.etl.test.TestEnvironment;
+import com.linkedpipes.etl.test.TestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- *
- * @author Klímek Jakub
- */
 public class CkanPurgerTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(CkanPurgerTest.class);
 
-    @Test
+    //@Test
     public void loadTest() throws Exception {
         final CkanPurger component = new CkanPurger();
         component.configuration = new CkanPurgerConfiguration();

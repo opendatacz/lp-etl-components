@@ -1,10 +1,14 @@
 package com.linkedpipes.plugin.transformer.fdp;
 
-import org.openrdf.model.*;
-import org.openrdf.model.impl.SimpleValueFactory;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Literal;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
 /**
  * Created by admin on 2.9.2016.

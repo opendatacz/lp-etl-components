@@ -1,16 +1,16 @@
 package com.linkedpipes.plugin.transformer.fdp.dimension;
 
-import com.linkedpipes.etl.component.api.service.ExceptionFactory;
-import com.linkedpipes.etl.executor.api.v1.exception.LpException;
+import com.linkedpipes.etl.executor.api.v1.LpException;
+import com.linkedpipes.etl.executor.api.v1.service.ExceptionFactory;
 import com.linkedpipes.plugin.transformer.fdp.FdpAttribute;
 import com.linkedpipes.plugin.transformer.fdp.FdpToRdfVocabulary;
 import com.linkedpipes.plugin.transformer.fdp.Mapper;
 import com.linkedpipes.plugin.transformer.fdp.dimension.FdpDimension;
-import org.openrdf.model.IRI;
-import org.openrdf.model.Resource;
 
 import java.io.IOException;
 import java.util.HashMap;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Resource;
 
 public class SkosDimension extends FdpDimension {
     public static final String dimensionQuery = "PREFIX qb: <http://purl.org/linked-data/cube#>\n" +

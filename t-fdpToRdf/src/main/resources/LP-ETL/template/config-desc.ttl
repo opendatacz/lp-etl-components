@@ -1,5 +1,11 @@
 @prefix config: <http://plugins.linkedpipes.com/ontology/configuration/> .
 
-<http://opendata.cz/resource/lp/etl/components/t-fdpToRdf/0.0.0/configurationDesc>
+<http://opendata.cz/resource/lp/etl/components/t-fdpToRdf/0.0.0/configurationDescription>
     a <http://plugins.linkedpipes.com/ontology/ConfigurationDescription> ;
-    config:type <http://plugins.linkedpipes.com/ontology/t-fdpToRdf#Configuration> .
+    config:type <http://plugins.linkedpipes.com/ontology/t-fdpToRdf#Configuration> ;
+    config:member <http://linkedpipes.com/resources/components/t-fdpToRdf/0.0.0/configuration/desc/fileName> .
+
+<http://linkedpipes.com/resources/components/t-fdpToRdf/0.0.0/configuration/desc/fileName>
+    a config:ConfigurationMember ;
+    config:property <http://plugins.linkedpipes.com/ontology/t-fdpToRdf#fileName> ;
+    config:control <http://plugins.linkedpipes.com/ontology/t-fdpToRdf#apiUrlControl> .

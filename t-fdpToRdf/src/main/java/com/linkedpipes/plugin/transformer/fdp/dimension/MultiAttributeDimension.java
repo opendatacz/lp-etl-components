@@ -1,68 +1,68 @@
 package com.linkedpipes.plugin.transformer.fdp.dimension;
 
+import com.linkedpipes.etl.executor.api.v1.LpException;
+import com.linkedpipes.etl.executor.api.v1.service.ExceptionFactory;
 import java.io.IOException;
 import java.util.*;
 
-import com.linkedpipes.etl.component.api.service.ExceptionFactory;
 import com.linkedpipes.plugin.transformer.fdp.FdpAttribute;
 import com.linkedpipes.plugin.transformer.fdp.FdpToRdfVocabulary;
 import com.linkedpipes.plugin.transformer.fdp.Mapper;
 import com.linkedpipes.plugin.transformer.fdp.dimension.FdpDimension;
-import org.openrdf.model.Resource;
-import org.openrdf.model.*;
-import com.linkedpipes.etl.executor.api.v1.exception.LpException;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Resource;
 
 public class MultiAttributeDimension extends FdpDimension {
-	public static final String attributeQuery = 
-			"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\r\n" + 
-			"PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\r\n" + 
-			"PREFIX fdp: <http://schemas.frictionlessdata.io/fiscal-data-package#>\r\n" + 
-			"PREFIX fcsv: <file://budget.csv#>\r\n" + 
-			"PREFIX obeu-attribute:   <http://data.openbudgets.eu/ontology/dsd/attribute/> \r\n" + 
-			"PREFIX obeu-dimension:   <http://data.openbudgets.eu/ontology/dsd/dimension/> \r\n" + 
-			"PREFIX obeu-measure:     <http://data.openbudgets.eu/ontology/dsd/measure/> \r\n" + 
-			"PREFIX qb: <http://purl.org/linked-data/cube#>\r\n" + 
-			"PREFIX datasets: <http://data.openbudgets.eu/datasets/>\r\n" + 
-			"PREFIX fdprdf: <http://data.openbudgets.eu/fdptordf#>\r\n" + 
-			"PREFIX schema: <http://schema.org/>\r\n" + 
-			"\r\n" + 
-			"\r\n" + 
-			"SELECT *" + 
-			"WHERE {\r\n" + 
-			"\r\n" + 
-			" ?component fdprdf:attributeCount ?attrCount .\r\n" + 
-			"  FILTER(?attrCount > 1)\r\n" + 
-			"  \r\n" + 
-			"  VALUES ( 	?valueType 			?rdfType 			?componentProperty ) {\r\n" + 
-			"    ( 	   	fdprdf:organization	schema:Organization	qb:dimension	)\r\n" + 
-			"    (		fdprdf:location		schema:Location		qb:attribute	)\r\n" + 
-			"    (		fdprdf:unknown		UNDEF				qb:dimension	)\r\n" + 
-			"    (		fdprdf:fact			UNDEF				qb:componentProperty	)\r\n" + 
-			"  } \r\n" + 
-			"  \r\n" + 
-			"  ?dsd a qb:DataStructureDefinition;\r\n" + 
-			"         qb:component ?component .\r\n" + 
-			"  ?component ?componentProperty _dimensionProp_;\r\n" + 
-			"             fdprdf:attribute ?attribute ;\r\n" + 
-			"             fdprdf:valueType ?valueType .\r\n" + 
-			"             \r\n" + 
-			"  \r\n" + 
+	public static final String attributeQuery =
+			"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\r\n" +
+			"PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\r\n" +
+			"PREFIX fdp: <http://schemas.frictionlessdata.io/fiscal-data-package#>\r\n" +
+			"PREFIX fcsv: <file://budget.csv#>\r\n" +
+			"PREFIX obeu-attribute:   <http://data.openbudgets.eu/ontology/dsd/attribute/> \r\n" +
+			"PREFIX obeu-dimension:   <http://data.openbudgets.eu/ontology/dsd/dimension/> \r\n" +
+			"PREFIX obeu-measure:     <http://data.openbudgets.eu/ontology/dsd/measure/> \r\n" +
+			"PREFIX qb: <http://purl.org/linked-data/cube#>\r\n" +
+			"PREFIX datasets: <http://data.openbudgets.eu/datasets/>\r\n" +
+			"PREFIX fdprdf: <http://data.openbudgets.eu/fdptordf#>\r\n" +
+			"PREFIX schema: <http://schema.org/>\r\n" +
+			"\r\n" +
+			"\r\n" +
+			"SELECT *" +
+			"WHERE {\r\n" +
+			"\r\n" +
+			" ?component fdprdf:attributeCount ?attrCount .\r\n" +
+			"  FILTER(?attrCount > 1)\r\n" +
+			"  \r\n" +
+			"  VALUES ( 	?valueType 			?rdfType 			?componentProperty ) {\r\n" +
+			"    ( 	   	fdprdf:organization	schema:Organization	qb:dimension	)\r\n" +
+			"    (		fdprdf:location		schema:Location		qb:attribute	)\r\n" +
+			"    (		fdprdf:unknown		UNDEF				qb:dimension	)\r\n" +
+			"    (		fdprdf:fact			UNDEF				qb:componentProperty	)\r\n" +
+			"  } \r\n" +
+			"  \r\n" +
+			"  ?dsd a qb:DataStructureDefinition;\r\n" +
+			"         qb:component ?component .\r\n" +
+			"  ?component ?componentProperty _dimensionProp_;\r\n" +
+			"             fdprdf:attribute ?attribute ;\r\n" +
+			"             fdprdf:valueType ?valueType .\r\n" +
+			"             \r\n" +
+			"  \r\n" +
 			"  ?attribute fdprdf:sourceColumn ?sourceColumn ;\r\n"
 			+ "			  fdprdf:sourceFile ?sourceFile;"
 			+ "			  fdprdf:iskey ?iskey;" +
-			"             fdprdf:valueProperty ?attributeValueProperty .\r\n" + 
-			"  FILTER NOT EXISTS {?attribute fdprdf:isHierarchical true .}\r\n" + 
-			"                        \r\n" + 
-			"  ?dataset a qb:DataSet;  \r\n" + 
-			"      	   qb:structure ?dsd .           \r\n" + 
+			"             fdprdf:valueProperty ?attributeValueProperty .\r\n" +
+			"  FILTER NOT EXISTS {?attribute fdprdf:isHierarchical true .}\r\n" +
+			"                        \r\n" +
+			"  ?dataset a qb:DataSet;  \r\n" +
+			"      	   qb:structure ?dsd .           \r\n" +
 			"  \r\n" +
 			"}";
-	
+
 	public String getAttributeQueryTemplate() {
 		return this.attributeQuery;
 	}
-	
-	public static final String dimensionQuery = 
+
+	public static final String dimensionQuery =
 			"PREFIX qb: <http://purl.org/linked-data/cube#>\n" +
 					"PREFIX fdprdf: <http://data.openbudgets.eu/fdptordf#>\n" +
 					"PREFIX schema: <http://schema.org/>\n" +
@@ -97,9 +97,9 @@ public class MultiAttributeDimension extends FdpDimension {
 					"  }   \n" +
 					"  FILTER (?attrCount = ?nonHierarchCount)\n" +
 					"}";
-	
+
 	public MultiAttributeDimension(){}
-	
+
 	public void processRow(IRI observation, HashMap<String, String> row, ExceptionFactory exceptionFactory) throws LpException, IOException {
 		Resource dimensionVal = createValueIri(row);
 		if(valueType!=null) output.submit(dimensionVal, Mapper.VALUE_FACTORY.createIRI(FdpToRdfVocabulary.A), valueType);

@@ -1,21 +1,18 @@
 package com.linkedpipes.plugin.exec.dkanPurger;
 
-import com.linkedpipes.etl.component.api.service.RdfToPojo;
+import com.linkedpipes.etl.executor.api.v1.rdf.RdfToPojo;
 
-/**
- *
- * @author Klímek Jakub
- */
-@RdfToPojo.Type(uri = DkanPurgerConfigVocabulary.CONFIG_CLASS)
+
+@RdfToPojo.Type(iri = DkanPurgerConfigVocabulary.CONFIG_CLASS)
 public class DkanPurgerConfiguration {
 
-    @RdfToPojo.Property(uri = DkanPurgerConfigVocabulary.API_URL)
+    @RdfToPojo.Property(iri = DkanPurgerConfigVocabulary.API_URL)
     private String apiUri;
 
-    @RdfToPojo.Property(uri = DkanPurgerConfigVocabulary.USERNAME)
+    @RdfToPojo.Property(iri = DkanPurgerConfigVocabulary.USERNAME)
     private String username;
 
-    @RdfToPojo.Property(uri = DkanPurgerConfigVocabulary.PASSWORD)
+    @RdfToPojo.Property(iri = DkanPurgerConfigVocabulary.PASSWORD)
     private String password;
 
     public DkanPurgerConfiguration() {

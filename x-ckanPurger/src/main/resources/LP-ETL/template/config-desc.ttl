@@ -1,5 +1,17 @@
 @prefix config: <http://plugins.linkedpipes.com/ontology/configuration/> .
 
-<http://opendata.cz/resource/lp/etl/components/x-ckanPurger/0.0.0/configurationDesc>
+<http://opendata.cz/resource/lp/etl/components/x-ckanPurger/0.0.0/configurationDescription>
     a <http://plugins.linkedpipes.com/ontology/ConfigurationDescription> ;
-    config:type <http://plugins.linkedpipes.com/ontology/x-ckanPurger#Configuration> .
+    config:type <http://plugins.linkedpipes.com/ontology/x-ckanPurger#Configuration> ;
+    config:member <http://linkedpipes.com/resources/components/x-ckanPurger/0.0.0/configuration/desc/apiUrl> ,
+        <http://linkedpipes.com/resources/components/x-ckanPurger/0.0.0/configuration/desc/apiKey> .
+
+<http://linkedpipes.com/resources/components/x-ckanPurger/0.0.0/configuration/desc/apiUrl>
+    a config:ConfigurationMember ;
+    config:property <http://plugins.linkedpipes.com/ontology/x-ckanPurger#apiUrl> ;
+    config:control <http://plugins.linkedpipes.com/ontology/x-ckanPurger#apiUrlControl> .
+
+<http://linkedpipes.com/resources/components/x-ckanPurger/0.0.0/configuration/desc/apiKey>
+    a config:ConfigurationMember ;
+    config:property <http://plugins.linkedpipes.com/ontology/x-ckanPurger#apiKey> ;
+    config:control <http://plugins.linkedpipes.com/ontology/x-ckanPurger#apiKeyControl> .

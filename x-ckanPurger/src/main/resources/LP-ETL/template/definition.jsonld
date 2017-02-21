@@ -10,11 +10,11 @@
             "http://linkedpipes.com/ontology/requirement": {"@id": "http://linkedpipes.com/resources/requirement/workingDirectory"},
             "http://linkedpipes.com/ontology/port": [ ],
             "http://linkedpipes.com/ontology/configurationDescription": [
-                {"@id": "http://opendata.cz/resource/lp/etl/components/x-ckanPurger/1.0.0/configurationDescription"}
+                {"@id": "http://opendata.cz/resource/lp/etl/components/x-ckanPurger/0.0.0/configurationDescription"}
             ]
         },
         {
-            "@id": "http://opendata.cz/resource/lp/etl/components/x-ckanPurger/1.0.0/configurationDescription",
+            "@id": "http://opendata.cz/resource/lp/etl/components/x-ckanPurger/0.0.0/configurationDescription",
             "@type": [
                 "http://linkedpipes.com/ontology/ConfigurationDescription"
             ],

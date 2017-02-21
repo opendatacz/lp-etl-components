@@ -1,20 +1,18 @@
 package com.linkedpipes.plugin.transformer.fdp;
 
-import com.linkedpipes.etl.dataunit.sesame.api.rdf.WritableSingleGraphDataUnit;
-import com.linkedpipes.etl.executor.api.v1.exception.LpException;
+import com.linkedpipes.etl.dataunit.core.rdf.WritableSingleGraphDataUnit;
+import com.linkedpipes.etl.executor.api.v1.LpException;
 import java.util.ArrayList;
 import java.util.List;
-import org.openrdf.model.IRI;
-import org.openrdf.model.Resource;
-import org.openrdf.model.Statement;
-import org.openrdf.model.Value;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
 /**
  * Buffered output handler.
- *
- * @author Petr Škoda
  */
 class BufferedOutput implements StatementConsumer {
 
@@ -31,7 +29,7 @@ class BufferedOutput implements StatementConsumer {
 
     BufferedOutput(WritableSingleGraphDataUnit dataUnit) {
         this.dataUnit = dataUnit;
-        graph = dataUnit.getGraph();
+        graph = dataUnit.getWriteGraph();
     }
 
     @Override

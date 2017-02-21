@@ -1,8 +1,8 @@
 package com.linkedpipes.plugin.transformer.fdp;
 
-import com.linkedpipes.etl.component.api.service.ExceptionFactory;
-import com.linkedpipes.etl.dataunit.system.api.files.FilesDataUnit;
-import com.linkedpipes.etl.executor.api.v1.exception.LpException;
+import com.linkedpipes.etl.dataunit.core.files.FilesDataUnit;
+import com.linkedpipes.etl.executor.api.v1.LpException;
+import com.linkedpipes.etl.executor.api.v1.service.ExceptionFactory;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -16,19 +16,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.supercsv.io.CsvListReader;
 import org.supercsv.prefs.CsvPreference;
-import org.supercsv.quote.QuoteMode;
-import org.supercsv.util.CsvContext;
 
-/**
- *
- * @author Petr Škoda
- */
 class Parser {
 
     private static final Logger LOG = LoggerFactory.getLogger(Parser.class);
 
     private final ExceptionFactory exceptionFactory;
-    
+
     //private final CsvPreference csvPreference;
 
     Parser(ExceptionFactory exceptionFactory) {
@@ -93,7 +87,7 @@ class Parser {
      */
     private InputStreamReader getInputStream(FileInputStream fileInputStream)
             throws UnsupportedEncodingException {
-    	
+
         return new InputStreamReader(
                     new BOMInputStream(fileInputStream, false),
                     "UTF-8");

@@ -1,25 +1,21 @@
 package com.linkedpipes.plugin.loader.dcatAp11ToCkanBatch;
 
-import com.linkedpipes.etl.component.api.service.RdfToPojo;
+import com.linkedpipes.etl.executor.api.v1.rdf.RdfToPojo;
 
-/**
- *
- * @author Klímek Jakub
- */
-@RdfToPojo.Type(uri = DcatAp11ToCkanBatchConfigVocabulary.CONFIG_CLASS)
+@RdfToPojo.Type(iri = DcatAp11ToCkanBatchConfigVocabulary.CONFIG_CLASS)
 public class DcatAp11ToCkanBatchConfiguration {
 
-    @RdfToPojo.Property(uri = DcatAp11ToCkanBatchConfigVocabulary.API_URL)
+    @RdfToPojo.Property(iri = DcatAp11ToCkanBatchConfigVocabulary.API_URL)
     private String apiUri;
 
-    @RdfToPojo.Property(uri = DcatAp11ToCkanBatchConfigVocabulary.API_KEY)
-    private String apiKey ;
+    @RdfToPojo.Property(iri = DcatAp11ToCkanBatchConfigVocabulary.API_KEY)
+    private String apiKey;
 
-    @RdfToPojo.Property(uri = DcatAp11ToCkanBatchConfigVocabulary.LOAD_LANGUAGE)
+    @RdfToPojo.Property(iri = DcatAp11ToCkanBatchConfigVocabulary.LOAD_LANGUAGE)
     private String loadLanguage;
 
-    @RdfToPojo.Property(uri = DcatAp11ToCkanBatchConfigVocabulary.PROFILE)
-    private String profile ;
+    @RdfToPojo.Property(iri = DcatAp11ToCkanBatchConfigVocabulary.PROFILE)
+    private String profile;
 
     public DcatAp11ToCkanBatchConfiguration() {
     }
