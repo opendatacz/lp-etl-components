@@ -54,6 +54,7 @@ public final class FdpToRdf implements Component.Sequential {
     public ExceptionFactory exceptionFactory;
     
     private PlainTextTripleWriter output;
+    private OutputStreamWriter outWriter;
     
     private List<FdpDimension> dimensions = new ArrayList<FdpDimension>();
     private List<HierarchicalDimension> hierarchicalDimensions = new ArrayList<HierarchicalDimension>();
@@ -246,7 +247,7 @@ public final class FdpToRdf implements Component.Sequential {
             //FileOutputStream outStream = new FileOutputStream(outputFile);
             //OutputStreamWriter outWriter = new OutputStreamWriter(outStream, Charset.forName(FILE_ENCODE));
             outputStream = new FileOutputStream(outputFile);
-            OutputStreamWriter outWriter = new OutputStreamWriter(outputStream, Charset.forName("UTF-8").newEncoder());//new FileWriter(outputFile, );
+            outWriter = new OutputStreamWriter(outputStream, Charset.forName("UTF-8").newEncoder());//new FileWriter(outputFile, );
             output = new PlainTextTripleWriter(outWriter);
         }
         catch (IOException ex){
@@ -272,11 +273,13 @@ public final class FdpToRdf implements Component.Sequential {
             try {
                 if(!entry.getFileName().endsWith(".nt")) {
                     parser.parse(entry, mapper, extractHeader(entry.getFileName()));
+                    output.onFileEnd();
                 }
                 else if(entry.getFileName().endsWith(".nt")) {
                     FileInputStream fileInputStream = new FileInputStream(entry.toFile());
                     IOUtils.copy(fileInputStream, outputStream);
                     fileInputStream.close();
+                    outputStream.flush();
                 }
             } catch (Exception ex) {
                 throw exceptionFactory.failure("Can't process file: {}",
@@ -284,11 +287,10 @@ public final class FdpToRdf implements Component.Sequential {
             }
         }
 
-        mapper.onTableEnd();
         try {
-            output.onFileEnd();
+            outputStream.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            throw exceptionFactory.failure("Can't close output file.", e);
         }
     }
 

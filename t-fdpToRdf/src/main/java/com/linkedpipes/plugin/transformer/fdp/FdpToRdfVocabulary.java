@@ -30,7 +30,8 @@ public final class FdpToRdfVocabulary {
 
     public static final String QB_OBSERVATION = QB + "observation";
     public static final String QB_OBSERVATION_TYPE = QB + "Observation";
-    public static final String QB_DATASET = QB + "dataset";
+    public static final String QB_DATASET = QB + "dataSet";
+    public static final String QB_CODELIST = QB + "codeList";
 
     private FdpToRdfVocabulary() {
     }

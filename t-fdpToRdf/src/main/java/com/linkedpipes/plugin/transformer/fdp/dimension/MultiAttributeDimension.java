@@ -24,7 +24,8 @@ public class MultiAttributeDimension extends FdpDimension {
 			"PREFIX qb: <http://purl.org/linked-data/cube#>\r\n" + 
 			"PREFIX datasets: <http://data.openbudgets.eu/datasets/>\r\n" + 
 			"PREFIX fdprdf: <http://data.openbudgets.eu/fdptordf#>\r\n" + 
-			"PREFIX schema: <http://schema.org/>\r\n" + 
+			"PREFIX schema: <http://schema.org/>\r\n" +
+            "PREFIX org: <http://www.w3.org/ns/org#>\r\n" +
 			"\r\n" + 
 			"\r\n" + 
 			"SELECT *" + 
@@ -34,7 +35,7 @@ public class MultiAttributeDimension extends FdpDimension {
 			"  FILTER(?attrCount > 1)\r\n" + 
 			"  \r\n" + 
 			"  VALUES ( 	?valueType 			?rdfType 			?componentProperty ) {\r\n" + 
-			"    ( 	   	fdprdf:organization	schema:Organization	qb:dimension	)\r\n" + 
+			"    ( 	   	fdprdf:organization	org:Organization	qb:dimension	)\r\n" +
 			"    (		fdprdf:location		schema:Location		qb:attribute	)\r\n" + 
 			"    (		fdprdf:unknown		UNDEF				qb:dimension	)\r\n" + 
 			"    (		fdprdf:fact			UNDEF				qb:componentProperty	)\r\n" + 

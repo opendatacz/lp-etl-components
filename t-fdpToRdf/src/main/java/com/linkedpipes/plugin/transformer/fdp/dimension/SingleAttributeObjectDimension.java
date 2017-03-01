@@ -17,11 +17,12 @@ public class SingleAttributeObjectDimension extends FdpDimension {
             "PREFIX fdprdf: <http://data.openbudgets.eu/fdptordf#>" +
                     "PREFIX schema: <http://schema.org/>\n" +
                     "PREFIX qb: <http://purl.org/linked-data/cube#>\r\n" +
+                    "PREFIX org: <http://www.w3.org/ns/org#>" +
                     "\n" +
                     "SELECT *\n" +
                     "WHERE { \n" +
                     "VALUES ( 	?valueType 			?rdfType 			?componentProperty 		?attrValueProperty ) {" +
-        "    ( \t   \tfdprdf:organization\tschema:Organization\tqb:dimension\t\t\tschema:name )\n" +
+        "    ( \t   \tfdprdf:organization\torg:Organization\tqb:dimension\t\t\tschema:name )\n" +
                 "    (\t\tfdprdf:location\t\tschema:Location\t\tqb:attribute\t\t\tschema:name )\n" +
                     "}" +
             "  ?component ?componentProperty _dimensionProp_;\r\n" +
