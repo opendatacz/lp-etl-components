@@ -3,4 +3,6 @@
     <http://plugins.linkedpipes.com/ontology/l-dcatAp11ToCkanBatch#apiUri> "" ;
     <http://plugins.linkedpipes.com/ontology/l-dcatAp11ToCkanBatch#apiKey> "" ;
     <http://plugins.linkedpipes.com/ontology/l-dcatAp11ToCkan#loadLanguage> "en" ;
+    <http://plugins.linkedpipes.com/ontology/l-dcatAp11ToCkan#toFile> false ;
+    <http://plugins.linkedpipes.com/ontology/l-dcatAp11ToCkan#toApi> true ;
     <http://plugins.linkedpipes.com/ontology/l-dcatAp11ToCkan#profile> <http://plugins.etl.linkedpipes.com/resource/l-dcatAp11ToCkanBatch/profiles/CKAN> .

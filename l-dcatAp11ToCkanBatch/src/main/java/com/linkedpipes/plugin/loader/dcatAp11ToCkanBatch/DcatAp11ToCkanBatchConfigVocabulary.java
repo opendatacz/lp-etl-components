@@ -14,4 +14,8 @@ public class DcatAp11ToCkanBatchConfigVocabulary {
 
     public static final String PROFILE = PREFIX + "profile";
 
+    public static final String FILE_OUTPUT = PREFIX + "toFile";
+
+    public static final String API_OUTPUT = PREFIX + "toApi";
+
 }

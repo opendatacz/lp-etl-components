@@ -17,6 +17,12 @@ public class DcatAp11ToCkanBatchConfiguration {
     @RdfToPojo.Property(iri = DcatAp11ToCkanBatchConfigVocabulary.PROFILE)
     private String profile;
 
+    @RdfToPojo.Property(iri = DcatAp11ToCkanBatchConfigVocabulary.FILE_OUTPUT)
+    private Boolean toFile;
+
+    @RdfToPojo.Property(iri = DcatAp11ToCkanBatchConfigVocabulary.API_OUTPUT)
+    private Boolean toApi;
+
     public DcatAp11ToCkanBatchConfiguration() {
     }
 
@@ -50,5 +56,21 @@ public class DcatAp11ToCkanBatchConfiguration {
 
     public void setProfile(String profile) {
         this.profile = profile;
+    }
+
+    public Boolean getToFile() {
+        return toFile;
+    }
+
+    public void setToFile(Boolean toFile) {
+        this.toFile = toFile;
+    }
+
+    public Boolean getToApi() {
+        return toApi;
+    }
+
+    public void setToApi(Boolean toApi) {
+        this.toApi = toApi;
     }
 }

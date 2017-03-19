@@ -1,5 +1,7 @@
 *.prefs
 *.class
+*.iml
+.idea
 
 # Eclipse Project Files #
 .project
