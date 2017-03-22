@@ -11,6 +11,10 @@ define([], function () {
 
             $scope.dialog.apiUrl = rdf.getString(resource, 'apiUrl');
             $scope.dialog.apiKey = rdf.getString(resource, 'apiKey');
+
+            $scope.dialog.purgeAllDatasets = rdf.getBoolean(resource, 'purgeAllDatasets');
+            $scope.dialog.purgeAllOrganizations = rdf.getBoolean(resource, 'purgeAllOrganizations');
+            $scope.dialog.failOnError = rdf.getBoolean(resource, 'failOnError');
         };
 
         function saveDialog() {
@@ -18,6 +22,10 @@ define([], function () {
 
             rdf.setString(resource, 'apiUrl', $scope.dialog.apiUrl);
             rdf.setString(resource, 'apiKey', $scope.dialog.apiKey);
+
+            rdf.setBoolean(resource, 'purgeAllDatasets', $scope.dialog.purgeAllDatasets);
+            rdf.setBoolean(resource, 'purgeAllOrganizations', $scope.dialog.purgeAllOrganizations);
+            rdf.setBoolean(resource, 'failOnError', $scope.dialog.failOnError);
 
             return rdf.getData();
         };

@@ -4,7 +4,10 @@
     a <http://plugins.linkedpipes.com/ontology/ConfigurationDescription> ;
     config:type <http://plugins.linkedpipes.com/ontology/x-ckanPurger#Configuration> ;
     config:member <http://linkedpipes.com/resources/components/x-ckanPurger/0.0.0/configuration/desc/apiUrl> ,
-        <http://linkedpipes.com/resources/components/x-ckanPurger/0.0.0/configuration/desc/apiKey> .
+        <http://linkedpipes.com/resources/components/x-ckanPurger/0.0.0/configuration/desc/apiKey> ,
+        <http://linkedpipes.com/resources/components/x-ckanPurger/0.0.0/configuration/desc/purgeAllDatasets> ,
+        <http://linkedpipes.com/resources/components/x-ckanPurger/0.0.0/configuration/desc/purgeAllOrganizations> ,
+        <http://linkedpipes.com/resources/components/x-ckanPurger/0.0.0/configuration/desc/failOnError> .
 
 <http://linkedpipes.com/resources/components/x-ckanPurger/0.0.0/configuration/desc/apiUrl>
     a config:ConfigurationMember ;
@@ -15,3 +18,18 @@
     a config:ConfigurationMember ;
     config:property <http://plugins.linkedpipes.com/ontology/x-ckanPurger#apiKey> ;
     config:control <http://plugins.linkedpipes.com/ontology/x-ckanPurger#apiKeyControl> .
+
+<http://linkedpipes.com/resources/components/x-ckanPurger/0.0.0/configuration/desc/purgeAllDatasets>
+    a config:ConfigurationMember ;
+    config:property <http://plugins.linkedpipes.com/ontology/x-ckanPurger#purgeAllDatasets> ;
+    config:control <http://plugins.linkedpipes.com/ontology/x-ckanPurger#purgeAllDatasetsControl> .
+
+<http://linkedpipes.com/resources/components/x-ckanPurger/0.0.0/configuration/desc/purgeAllOrganizations>
+    a config:ConfigurationMember ;
+    config:property <http://plugins.linkedpipes.com/ontology/x-ckanPurger#purgeAllOrganizations> ;
+    config:control <http://plugins.linkedpipes.com/ontology/x-ckanPurger#purgeAllOrganizationsControl> .
+
+<http://linkedpipes.com/resources/components/x-ckanPurger/0.0.0/configuration/desc/failOnError>
+    a config:ConfigurationMember ;
+    config:property <http://plugins.linkedpipes.com/ontology/x-ckanPurger#failOnError> ;
+    config:control <http://plugins.linkedpipes.com/ontology/x-ckanPurger#failOnErrorControl> .

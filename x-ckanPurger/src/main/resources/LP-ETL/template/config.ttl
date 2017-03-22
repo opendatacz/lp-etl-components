@@ -1,4 +1,7 @@
 <http://opendata.cz/resource/lp/etl/components/x-ckanPurger/0.0.0/configuration>
     a <http://plugins.linkedpipes.com/ontology/x-ckanPurger#Configuration> ;
     <http://plugins.linkedpipes.com/ontology/x-ckanPurger#apiUri> "" ;
-    <http://plugins.linkedpipes.com/ontology/x-ckanPurger#apiKey> "" .
+    <http://plugins.linkedpipes.com/ontology/x-ckanPurger#apiKey> "" ;
+    <http://plugins.linkedpipes.com/ontology/x-ckanPurger#purgeAllDatasets> false ;
+    <http://plugins.linkedpipes.com/ontology/x-ckanPurger#purgeAllOrganizations> false ;
+    <http://plugins.linkedpipes.com/ontology/x-ckanPurger#failOnError> false .
