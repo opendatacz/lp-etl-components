@@ -1,5 +1,41 @@
 @prefix config: <http://plugins.linkedpipes.com/ontology/configuration/> .
 
-<http://opendata.cz/resource/lp/etl/components/l-dcatAp11ToCkanBatch/0.0.0/configurationDesc>
+<http://opendata.cz/resource/lp/etl/components/l-dcatAp11ToCkanBatch/0.0.0/configurationDescription>
     a <http://plugins.linkedpipes.com/ontology/ConfigurationDescription> ;
-    config:type <http://opendata.cz/ontology/lp/etl/components/l-dcatAp11ToCkanBatch#Configuration> .
+    config:type <http://plugins.linkedpipes.com/ontology/l-dcatAp11ToCkanBatch#Configuration> ;
+    config:member <http://linkedpipes.com/resources/components/l-dcatAp11ToCkanBatch/0.0.0/configuration/desc/apiUrl> ,
+        <http://linkedpipes.com/resources/components/l-dcatAp11ToCkanBatch/0.0.0/configuration/desc/apiKey> ,
+        <http://linkedpipes.com/resources/components/l-dcatAp11ToCkanBatch/0.0.0/configuration/desc/loadLanguage> ,
+        <http://linkedpipes.com/resources/components/l-dcatAp11ToCkanBatch/0.0.0/configuration/desc/profile> ,
+        <http://linkedpipes.com/resources/components/l-dcatAp11ToCkanBatch/0.0.0/configuration/desc/toFile> ,
+        <http://linkedpipes.com/resources/components/l-dcatAp11ToCkanBatch/0.0.0/configuration/desc/toApi> .
+
+<http://linkedpipes.com/resources/components/l-dcatAp11ToCkanBatch/0.0.0/configuration/desc/apiUrl>
+    a config:ConfigurationMember ;
+    config:property <http://plugins.linkedpipes.com/ontology/l-dcatAp11ToCkanBatch#apiUrl> ;
+    config:control <http://plugins.linkedpipes.com/ontology/l-dcatAp11ToCkanBatch#apiUrlControl> .
+
+<http://linkedpipes.com/resources/components/l-dcatAp11ToCkanBatch/0.0.0/configuration/desc/apiKey>
+    a config:ConfigurationMember ;
+    config:property <http://plugins.linkedpipes.com/ontology/l-dcatAp11ToCkanBatch#apiKey> ;
+    config:control <http://plugins.linkedpipes.com/ontology/l-dcatAp11ToCkanBatch#apiKeyControl> .
+
+<http://linkedpipes.com/resources/components/l-dcatAp11ToCkanBatch/0.0.0/configuration/desc/loadLanguage>
+    a config:ConfigurationMember ;
+    config:property <http://plugins.linkedpipes.com/ontology/l-dcatAp11ToCkanBatch#loadLanguage> ;
+    config:control <http://plugins.linkedpipes.com/ontology/l-dcatAp11ToCkanBatch#loadLanguageControl> .
+
+<http://linkedpipes.com/resources/components/l-dcatAp11ToCkanBatch/0.0.0/configuration/desc/profile>
+    a config:ConfigurationMember ;
+    config:property <http://plugins.linkedpipes.com/ontology/l-dcatAp11ToCkanBatch#profile> ;
+    config:control <http://plugins.linkedpipes.com/ontology/l-dcatAp11ToCkanBatch#profileControl> .
+
+<http://linkedpipes.com/resources/components/l-dcatAp11ToCkanBatch/0.0.0/configuration/desc/toFile>
+    a config:ConfigurationMember ;
+    config:property <http://plugins.linkedpipes.com/ontology/l-dcatAp11ToCkanBatch#toFile> ;
+    config:control <http://plugins.linkedpipes.com/ontology/l-dcatAp11ToCkanBatch#toFileControl> .
+
+<http://linkedpipes.com/resources/components/l-dcatAp11ToCkanBatch/0.0.0/configuration/desc/toApi>
+    a config:ConfigurationMember ;
+    config:property <http://plugins.linkedpipes.com/ontology/l-dcatAp11ToCkanBatch#toApi> ;
+    config:control <http://plugins.linkedpipes.com/ontology/l-dcatAp11ToCkanBatch#toApiControl> .

@@ -1,6 +1,14 @@
 package com.linkedpipes.plugin.loader.dcatAp11ToCkanBatch;
 
-import java.io.IOException;
+import com.linkedpipes.etl.dataunit.core.files.WritableFilesDataUnit;
+import com.linkedpipes.etl.dataunit.core.rdf.SingleGraphDataUnit;
+import com.linkedpipes.etl.executor.api.v1.LpException;
+import com.linkedpipes.etl.executor.api.v1.component.Component;
+import com.linkedpipes.etl.executor.api.v1.component.SequentialExecution;
+import com.linkedpipes.etl.executor.api.v1.service.ExceptionFactory;
+import com.linkedpipes.etl.executor.api.v1.service.ProgressReport;
+
+import java.io.*;
 import java.nio.charset.Charset;
 import java.text.Normalizer;
 import java.util.HashMap;
@@ -9,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.linkedpipes.etl.component.api.service.ProgressReport;
+import org.apache.commons.io.FileUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -20,39 +28,33 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.client.LaxRedirectStrategy;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.util.EntityUtils;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.vocabulary.DCTERMS;
+import org.eclipse.rdf4j.model.vocabulary.FOAF;
+import org.eclipse.rdf4j.model.vocabulary.SKOS;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.QueryLanguage;
+import org.eclipse.rdf4j.query.QueryResults;
+import org.eclipse.rdf4j.query.TupleQuery;
+import org.eclipse.rdf4j.query.TupleQueryResult;
+import org.eclipse.rdf4j.query.impl.SimpleDataset;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.openrdf.model.Value;
-import org.openrdf.model.vocabulary.DCTERMS;
-import org.openrdf.model.vocabulary.FOAF;
-import org.openrdf.model.vocabulary.SKOS;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.QueryLanguage;
-import org.openrdf.query.QueryResults;
-import org.openrdf.query.TupleQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.linkedpipes.etl.dataunit.sesame.api.rdf.SingleGraphDataUnit;
-import org.openrdf.query.TupleQueryResult;
-import com.linkedpipes.etl.component.api.Component;
-import com.linkedpipes.etl.component.api.service.ExceptionFactory;
-import com.linkedpipes.etl.executor.api.v1.exception.LpException;
-import org.openrdf.query.impl.SimpleDataset;
-
-/**
- *
- * @author Klímek Jakub
- */
-public final class DcatAp11ToCkanBatch implements Component.Sequential {
+public final class DcatAp11ToCkanBatch implements Component, SequentialExecution {
 
     private static final Logger LOG = LoggerFactory.getLogger(DcatAp11ToCkanBatch.class);
 
-    @Component.InputPort(id = "Metadata")
+    @Component.InputPort(iri = "Metadata")
     public SingleGraphDataUnit metadata;
 
-    @Component.InputPort(id = "Codelists", optional = true)
+    @Component.InputPort(iri = "Codelists")
     public SingleGraphDataUnit codelists;
+
+    @Component.OutputPort(iri = "JSONOutput")
+    public WritableFilesDataUnit output;
 
     @Component.Configuration
     public DcatAp11ToCkanBatchConfiguration configuration;
@@ -75,7 +77,7 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
                 .replace("/","-")
                 .replace(":","-")
                 .replace(";","-")
-                .replace("§", "paragraf");
+                .replace("ยง", "paragraf");
     }
 
     private Map<String, String> getOrganizations() {
@@ -171,6 +173,19 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
         int current = 0;
         int total = datasets.size();
 
+        PrintWriter writer = null;
+
+        if (configuration.getToFile()) {
+            try {
+                writer = new PrintWriter(output.createFile("ckan.jsonl"), "UTF-8");
+            } catch (FileNotFoundException e) {
+                LOG.error(e.getLocalizedMessage());
+
+            } catch (UnsupportedEncodingException e) {
+                LOG.error(e.getLocalizedMessage());
+            }
+        }
+
         LOG.info("Found " + total + " datasets");
 
         progressReport.start(total);
@@ -194,40 +209,42 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
             Map<String, String> resDistroIdMap = new HashMap<>();
             Map<String, JSONObject> resourceList = new HashMap<>();
 
-            LOG.debug("Querying for the dataset " + datasetID + " in CKAN");
-            HttpGet httpGet = new HttpGet(apiURI + "/package_show?id=" + datasetID);
-            try {
-                queryResponse = queryClient.execute(httpGet);
-                if (queryResponse.getStatusLine().getStatusCode() == 200) {
-                    LOG.debug("Dataset found");
-                    datasetExists = true;
+            if (configuration.getToApi()) {
+                LOG.debug("Querying for the dataset " + datasetID + " in CKAN");
+                HttpGet httpGet = new HttpGet(apiURI + "/package_show?id=" + datasetID);
+                try {
+                    queryResponse = queryClient.execute(httpGet);
+                    if (queryResponse.getStatusLine().getStatusCode() == 200) {
+                        LOG.debug("Dataset found");
+                        datasetExists = true;
 
-                    JSONObject response = new JSONObject(EntityUtils.toString(queryResponse.getEntity())).getJSONObject("result");
-                    JSONArray resourcesArray = response.getJSONArray("resources");
-                    for (int i = 0; i < resourcesArray.length(); i++) {
-                        String id = resourcesArray.getJSONObject(i).getString("id");
-                        resourceList.put(id, resourcesArray.getJSONObject(i));
+                        JSONObject response = new JSONObject(EntityUtils.toString(queryResponse.getEntity())).getJSONObject("result");
+                        JSONArray resourcesArray = response.getJSONArray("resources");
+                        for (int i = 0; i < resourcesArray.length(); i++) {
+                            String id = resourcesArray.getJSONObject(i).getString("id");
+                            resourceList.put(id, resourcesArray.getJSONObject(i));
 
-                        String url = resourcesArray.getJSONObject(i).getString("url");
-                        resUrlIdMap.put(url, id);
+                            String url = resourcesArray.getJSONObject(i).getString("url");
+                            resUrlIdMap.put(url, id);
 
-                        if (resourcesArray.getJSONObject(i).has("distro_url")) {
-                            String distro = resourcesArray.getJSONObject(i).getString("distro_url");
-                            resDistroIdMap.put(distro, id);
+                            if (resourcesArray.getJSONObject(i).has("distro_url")) {
+                                String distro = resourcesArray.getJSONObject(i).getString("distro_url");
+                                resDistroIdMap.put(distro, id);
+                            }
                         }
+                    } else {
+                        String ent = EntityUtils.toString(queryResponse.getEntity());
+                        LOG.debug("Dataset not found: " + ent);
                     }
-                } else {
-                    String ent = EntityUtils.toString(queryResponse.getEntity());
-                    LOG.debug("Dataset not found: " + ent);
-                }
-            } catch (Exception e) {
-                LOG.error(e.getLocalizedMessage(), e);
-            } finally {
-                if (queryResponse != null) {
-                    try {
-                        queryResponse.close();
-                    } catch (IOException e) {
-                        LOG.error(e.getLocalizedMessage(), e);
+                } catch (Exception e) {
+                    LOG.error(e.getLocalizedMessage(), e);
+                } finally {
+                    if (queryResponse != null) {
+                        try {
+                            queryResponse.close();
+                        } catch (IOException e) {
+                            LOG.error(e.getLocalizedMessage(), e);
+                        }
                     }
                 }
             }
@@ -240,6 +257,7 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
             String publisher_uri = executeSimpleSelectQuery("SELECT ?publisher_uri WHERE {<" + datasetURI + "> <" + DCTERMS.PUBLISHER + "> ?publisher_uri }", "publisher_uri");
             String publisher_name = executeSimpleSelectQuery("SELECT ?publisher_name WHERE {<" + datasetURI + "> <" + DCTERMS.PUBLISHER + ">/<" + FOAF.NAME + "> ?publisher_name FILTER(LANGMATCHES(LANG(?publisher_name), \"" + configuration.getLoadLanguage() + "\"))}", "publisher_name");
 
+            //This is done even if getToApi is false, because there is no way to generate a file with organizations without getting their actual CKAN ID, so we need to create them here
             if (!organizations.containsKey(publisher_uri)) {
                 LOG.debug("Creating organization " + publisher_uri);
                 JSONObject root = new JSONObject();
@@ -484,8 +502,11 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
 
             root.put("resources", resources);
 
+            //Check whether this creates the dataset ok - it is mainly for the output file
+            root.put("owner_org", organizations.get(publisher_uri));
+
             //Create new dataset
-            if (!datasetExists) {
+            if (configuration.getToApi() && !datasetExists) {
                 JSONObject createRoot = new JSONObject();
                 CloseableHttpResponse response = null;
 
@@ -531,35 +552,42 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
                 }
             }
 
-            //Update existing dataset
-            String json = root.toString();
-            LOG.debug("Posting to CKAN");
-            HttpPost httpPost = new HttpPost(apiURI + "/package_update?id=" + datasetID);
-            httpPost.addHeader(new BasicHeader("Authorization", configuration.getApiKey()));
+            //Append current dataset to the output Array
+            if (configuration.getToFile()) {
+                writer.println(root.toString());
+            }
 
-            LOG.debug(json);
+            //Update existing dataset in API
+            if (configuration.getToApi()) {
+                String json = root.toString();
+                LOG.debug("Posting to CKAN");
+                HttpPost httpPost = new HttpPost(apiURI + "/package_update?id=" + datasetID);
+                httpPost.addHeader(new BasicHeader("Authorization", configuration.getApiKey()));
 
-            httpPost.setEntity(new StringEntity(json, Charset.forName("utf-8")));
-            CloseableHttpResponse response = null;
+                LOG.debug(json);
 
-            try {
-                response = postClient.execute(httpPost);
-                if (response.getStatusLine().getStatusCode() == 200) {
-                    //LOG.info("Response:" + EntityUtils.toString(response.getEntity()));
-                } else {
-                    String ent = EntityUtils.toString(response.getEntity());
-                    LOG.error("Response:" + ent);
-                    throw exceptionFactory.failure("Error updating dataset");
-                }
-            } catch (Exception e) {
-                LOG.error(e.getLocalizedMessage(), e);
-            } finally {
-                if (response != null) {
-                    try {
-                        response.close();
-                    } catch (IOException e) {
-                        LOG.error(e.getLocalizedMessage(), e);
+                httpPost.setEntity(new StringEntity(json, Charset.forName("utf-8")));
+                CloseableHttpResponse response = null;
+
+                try {
+                    response = postClient.execute(httpPost);
+                    if (response.getStatusLine().getStatusCode() == 200) {
+                        //LOG.info("Response:" + EntityUtils.toString(response.getEntity()));
+                    } else {
+                        String ent = EntityUtils.toString(response.getEntity());
+                        LOG.error("Response:" + ent);
                         throw exceptionFactory.failure("Error updating dataset");
+                    }
+                } catch (Exception e) {
+                    LOG.error(e.getLocalizedMessage(), e);
+                } finally {
+                    if (response != null) {
+                        try {
+                            response.close();
+                        } catch (IOException e) {
+                            LOG.error(e.getLocalizedMessage(), e);
+                            throw exceptionFactory.failure("Error updating dataset");
+                        }
                     }
                 }
             }
@@ -575,6 +603,10 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
             LOG.error(e.getLocalizedMessage(), e);
         }
 
+        if (configuration.getToFile()) {
+            writer.close();
+        }
+
         progressReport.done();
 
     }
@@ -583,7 +615,7 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
         return metadata.execute((connection) -> {
             final TupleQuery preparedQuery = connection.prepareTupleQuery(QueryLanguage.SPARQL, queryAsString);
             final SimpleDataset dataset = new SimpleDataset();
-            dataset.addDefaultGraph(metadata.getGraph());
+            dataset.addDefaultGraph(metadata.getReadGraph());
             preparedQuery.setDataset(dataset);
             //
             final BindingSet binding = QueryResults.singleResult(preparedQuery.evaluate());
@@ -599,7 +631,7 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
         return codelists.execute((connection) -> {
             final TupleQuery preparedQuery = connection.prepareTupleQuery(QueryLanguage.SPARQL, queryAsString);
             final SimpleDataset dataset = new SimpleDataset();
-            dataset.addDefaultGraph(codelists.getGraph());
+            dataset.addDefaultGraph(codelists.getReadGraph());
             preparedQuery.setDataset(dataset);
             //
             final BindingSet binding = QueryResults.singleResult(preparedQuery.evaluate());
@@ -616,7 +648,7 @@ public final class DcatAp11ToCkanBatch implements Component.Sequential {
             final List<Map<String, Value>> output = new LinkedList<>();
             final TupleQuery preparedQuery = connection.prepareTupleQuery(QueryLanguage.SPARQL, queryAsString);
             final SimpleDataset dataset = new SimpleDataset();
-            dataset.addDefaultGraph(metadata.getGraph());
+            dataset.addDefaultGraph(metadata.getReadGraph());
             preparedQuery.setDataset(dataset);
             //
             TupleQueryResult result = preparedQuery.evaluate();

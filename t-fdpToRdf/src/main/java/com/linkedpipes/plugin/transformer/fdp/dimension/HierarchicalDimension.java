@@ -1,19 +1,18 @@
 package com.linkedpipes.plugin.transformer.fdp.dimension;
 
-import com.linkedpipes.etl.component.api.service.ExceptionFactory;
-import com.linkedpipes.etl.executor.api.v1.exception.LpException;
+import com.linkedpipes.etl.executor.api.v1.LpException;
+import com.linkedpipes.etl.executor.api.v1.service.ExceptionFactory;
 import com.linkedpipes.plugin.transformer.fdp.FdpAttribute;
 import com.linkedpipes.plugin.transformer.fdp.FdpHierarchicalAttribute;
 import com.linkedpipes.plugin.transformer.fdp.FdpToRdfVocabulary;
 import com.linkedpipes.plugin.transformer.fdp.Mapper;
 import com.linkedpipes.plugin.transformer.fdp.dimension.FdpDimension;
-import org.openrdf.model.IRI;
 
 import java.io.IOException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import org.eclipse.rdf4j.model.IRI;
 
 public class HierarchicalDimension extends FdpDimension {
     public static final String dimensionQuery =

@@ -1,16 +1,14 @@
 package com.linkedpipes.plugin.transformer.fdp.dimension;
 
-import com.linkedpipes.etl.component.api.service.ExceptionFactory;
-import com.linkedpipes.etl.executor.api.v1.exception.LpException;
+import com.linkedpipes.etl.executor.api.v1.LpException;
+import com.linkedpipes.etl.executor.api.v1.service.ExceptionFactory;
 import com.linkedpipes.plugin.transformer.fdp.FdpAttribute;
 import com.linkedpipes.plugin.transformer.fdp.FdpToRdfVocabulary;
 import com.linkedpipes.plugin.transformer.fdp.Mapper;
-import org.openrdf.model.IRI;
-import org.openrdf.model.Resource;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Map;
+import org.eclipse.rdf4j.model.IRI;
 
 /**
  * Created by admin on 24.8.2016.

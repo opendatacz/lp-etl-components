@@ -13,7 +13,7 @@
                 {"@id": "http://opendata.cz/resource/lp/etl/components/l-dcatAp11ToDkanBatch/0.0.0/codelists"}
             ],
             "http://linkedpipes.com/ontology/configurationDescription": [
-                {"@id": "http://opendata.cz/resource/lp/etl/components/l-dcatAp11ToDkanBatch/1.0.0/configurationDescription"}
+                {"@id": "http://opendata.cz/resource/lp/etl/components/l-dcatAp11ToDkanBatch/0.0.0/configurationDescription"}
             ]
         },
         {

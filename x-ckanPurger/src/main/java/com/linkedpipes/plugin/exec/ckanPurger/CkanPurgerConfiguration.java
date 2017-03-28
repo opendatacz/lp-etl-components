@@ -1,19 +1,25 @@
 package com.linkedpipes.plugin.exec.ckanPurger;
 
-import com.linkedpipes.etl.component.api.service.RdfToPojo;
+import com.linkedpipes.etl.executor.api.v1.rdf.RdfToPojo;
 
-/**
- *
- * @author Klímek Jakub
- */
-@RdfToPojo.Type(uri = CkanPurgerConfigVocabulary.CONFIG_CLASS)
+@RdfToPojo.Type(iri = CkanPurgerConfigVocabulary.CONFIG_CLASS)
 public class CkanPurgerConfiguration {
 
-    @RdfToPojo.Property(uri = CkanPurgerConfigVocabulary.API_URL)
+    @RdfToPojo.Property(iri = CkanPurgerConfigVocabulary.API_URL)
     private String apiUri;
 
-    @RdfToPojo.Property(uri = CkanPurgerConfigVocabulary.API_KEY)
-    private String apiKey ;
+    @RdfToPojo.Property(iri = CkanPurgerConfigVocabulary.API_KEY)
+    private String apiKey;
+
+    @RdfToPojo.Property(iri = CkanPurgerConfigVocabulary.PURGE_ALL_DATASETS)
+    private boolean purgeAllDatasets = false;
+
+    @RdfToPojo.Property(
+            iri = CkanPurgerConfigVocabulary.PURGE_ALL_ORGANIZATIONS)
+    private boolean purgeAllOrganizations = false;
+
+    @RdfToPojo.Property(iri = CkanPurgerConfigVocabulary.FAIL_ON_ERROR)
+    private boolean failOnError = false;
 
     public CkanPurgerConfiguration() {
     }
@@ -32,6 +38,30 @@ public class CkanPurgerConfiguration {
 
     public void setApiKey(String apiKey) {
         this.apiKey = apiKey;
+    }
+
+    public boolean isPurgeAllDatasets() {
+        return purgeAllDatasets;
+    }
+
+    public void setPurgeAllDatasets(boolean purgeAllDatasets) {
+        this.purgeAllDatasets = purgeAllDatasets;
+    }
+
+    public boolean isPurgeAllOrganizations() {
+        return purgeAllOrganizations;
+    }
+
+    public void setPurgeAllOrganizations(boolean purgeAllOrganizations) {
+        this.purgeAllOrganizations = purgeAllOrganizations;
+    }
+
+    public boolean isFailOnError() {
+        return failOnError;
+    }
+
+    public void setFailOnError(boolean failOnError) {
+        this.failOnError = failOnError;
     }
 
 }

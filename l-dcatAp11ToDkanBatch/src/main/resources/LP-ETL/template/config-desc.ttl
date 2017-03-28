@@ -1,5 +1,35 @@
 @prefix config: <http://plugins.linkedpipes.com/ontology/configuration/> .
 
-<http://opendata.cz/resource/lp/etl/components/l-dcatAp11ToDkanBatch/0.0.0/configurationDesc>
+<http://opendata.cz/resource/lp/etl/components/l-dcatAp11ToDkanBatch/0.0.0/configurationDescription>
     a <http://plugins.linkedpipes.com/ontology/ConfigurationDescription> ;
-    config:type <http://plugins.linkedpipes.com/ontology/l-dcatAp11ToDkanBatch#Configuration> .
+    config:type <http://plugins.linkedpipes.com/ontology/l-dcatAp11ToDkanBatch#Configuration> ;
+    config:member <http://linkedpipes.com/resources/components/l-dcatAp11ToDkanBatch/0.0.0/configuration/desc/apiUrl> ,
+        <http://linkedpipes.com/resources/components/l-dcatAp11ToDkanBatch/0.0.0/configuration/desc/username> ,
+        <http://linkedpipes.com/resources/components/l-dcatAp11ToDkanBatch/0.0.0/configuration/desc/password> ,
+        <http://linkedpipes.com/resources/components/l-dcatAp11ToDkanBatch/0.0.0/configuration/desc/loadLanguage> ,
+        <http://linkedpipes.com/resources/components/l-dcatAp11ToDkanBatch/0.0.0/configuration/desc/profile> .
+
+<http://linkedpipes.com/resources/components/l-dcatAp11ToDkanBatch/0.0.0/configuration/desc/apiUrl>
+    a config:ConfigurationMember ;
+    config:property <http://plugins.linkedpipes.com/ontology/l-dcatAp11ToDkanBatch#apiUrl> ;
+    config:control <http://plugins.linkedpipes.com/ontology/l-dcatAp11ToDkanBatch#apiUrlControl> .
+
+<http://linkedpipes.com/resources/components/l-dcatAp11ToDkanBatch/0.0.0/configuration/desc/username>
+    a config:ConfigurationMember ;
+    config:property <http://plugins.linkedpipes.com/ontology/l-dcatAp11ToDkanBatch#username> ;
+    config:control <http://plugins.linkedpipes.com/ontology/l-dcatAp11ToDkanBatch#usernameControl> .
+
+<http://linkedpipes.com/resources/components/l-dcatAp11ToDkanBatch/0.0.0/configuration/desc/password>
+    a config:ConfigurationMember ;
+    config:property <http://plugins.linkedpipes.com/ontology/l-dcatAp11ToDkanBatch#password> ;
+    config:control <http://plugins.linkedpipes.com/ontology/l-dcatAp11ToDkanBatch#passwordControl> .
+
+<http://linkedpipes.com/resources/components/l-dcatAp11ToDkanBatch/0.0.0/configuration/desc/loadLanguage>
+    a config:ConfigurationMember ;
+    config:property <http://plugins.linkedpipes.com/ontology/l-dcatAp11ToDkanBatch#loadLanguage> ;
+    config:control <http://plugins.linkedpipes.com/ontology/l-dcatAp11ToDkanBatch#loadLanguageControl> .
+
+<http://linkedpipes.com/resources/components/l-dcatAp11ToDkanBatch/0.0.0/configuration/desc/profile>
+    a config:ConfigurationMember ;
+    config:property <http://plugins.linkedpipes.com/ontology/l-dcatAp11ToDkanBatch#profile> ;
+    config:control <http://plugins.linkedpipes.com/ontology/l-dcatAp11ToDkanBatch#profileControl> .

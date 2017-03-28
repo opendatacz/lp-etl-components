@@ -1,12 +1,8 @@
 package com.linkedpipes.plugin.loader.dcatAp11ToDkanBatch;
 
-import org.openrdf.model.IRI;
-import org.openrdf.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
-/**
- *
- * @author Klímek Jakub
- */
 public class DcatAp11ToDkanBatchVocabulary {
 
     public static final String SCHEMA = "http://schema.org/";

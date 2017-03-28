@@ -1,18 +1,17 @@
 package com.linkedpipes.plugin.transformer.fdp;
 
+import com.linkedpipes.etl.executor.api.v1.LpException;
+import com.linkedpipes.etl.executor.api.v1.service.ExceptionFactory;
 import java.io.IOException;
 import java.util.*;
 
 import com.linkedpipes.plugin.transformer.fdp.dimension.FdpDimension;
-import org.openrdf.model.*;
-import org.openrdf.model.impl.SimpleValueFactory;
-import com.linkedpipes.etl.component.api.service.ExceptionFactory;
-import com.linkedpipes.etl.executor.api.v1.exception.LpException;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
 /**
  * https://www.w3.org/TR/2015/REC-csv2rdf-20151217/#bib-tabular-data-model
- *
- * @author Škoda Petr
  */
 public class Mapper {
 
@@ -44,7 +43,7 @@ public class Mapper {
     private String datasetIri;
 
     private final ExceptionFactory exceptionFactory;
-    
+
     private List<FdpDimension> dimensions;
     private List<FdpMeasure> measures;
 
@@ -67,7 +66,7 @@ public class Mapper {
     private IRI getObservationUri() {
         return VALUE_FACTORY.createIRI(datasetIri+"/observation/"+rowNumber);
     }
-    
+
     /**
      * Must be called before {@link #onRow(java.util.List)}.
      *
@@ -76,7 +75,7 @@ public class Mapper {
     public void onHeader(List<String> header) {
         columns = header;
     }
-    
+
     /**
      *
      * @param row Row from the CSV file.

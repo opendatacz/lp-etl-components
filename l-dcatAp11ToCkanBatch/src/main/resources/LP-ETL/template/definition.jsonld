@@ -7,13 +7,15 @@
             "http://linkedpipes.com/ontology/jar" : {"@id": "http://opendata.cz/resource/lp/etl/jars/l-dcatAp11ToCkanBatch/0.0.0"},
             "http://linkedpipes.com/ontology/color": "#CEF6D8",
             "http://linkedpipes.com/ontology/componentType": {"@id": "http://etl.linkedpipes.com/ontology/component/type/Loader"},
+            "http://linkedpipes.com/ontology/supportControl" : true,
             "http://linkedpipes.com/ontology/requirement": {"@id": "http://linkedpipes.com/resources/requirement/workingDirectory"},
             "http://linkedpipes.com/ontology/port": [
                 {"@id": "http://opendata.cz/resource/lp/etl/components/l-dcatAp11ToCkanBatch/0.0.0/input"},
-                {"@id": "http://opendata.cz/resource/lp/etl/components/l-dcatAp11ToCkanBatch/0.0.0/codelists"}
+                {"@id": "http://opendata.cz/resource/lp/etl/components/l-dcatAp11ToCkanBatch/0.0.0/codelists"},
+                {"@id": "http://opendata.cz/resource/lp/etl/components/l-dcatAp11ToCkanBatch/0.0.0/output"}
             ],
             "http://linkedpipes.com/ontology/configurationDescription": [
-                {"@id": "http://opendata.cz/resource/lp/etl/components/l-dcatAp11ToCkanBatch/1.0.0/configurationDescription"}
+                {"@id": "http://opendata.cz/resource/lp/etl/components/l-dcatAp11ToCkanBatch/0.0.0/configurationDescription"}
             ]
         },
         {
@@ -37,13 +39,23 @@
             "http://linkedpipes.com/ontology/binding": "Codelists"
         },
         {
-            "@id": "http://opendata.cz/resource/lp/etl/components/l-dcatAp11ToCkanBatch/1.0.0/configurationDescription",
+            "@id": "http://opendata.cz/resource/lp/etl/components/l-dcatAp11ToCkanBatch/0.0.0/configurationDescription",
             "@type": [
                 "http://linkedpipes.com/ontology/ConfigurationDescription"
             ],
             "http://linkedpipes.com/ontology/privateProperties" : [
                 {"@id": "http://plugins.linkedpipes.com/ontology/l-dcatAp11ToCkanBatch#apiKey"}
             ]
+        },
+        {
+            "@id": "http://opendata.cz/resource/lp/etl/components/l-dcatAp11ToCkanBatch/0.0.0/output",
+            "http://www.w3.org/2004/02/skos/core#prefLabel": "JSON Lines",
+            "@type": [
+                "http://linkedpipes.com/ontology/dataUnit/system/1.0/files/DirectoryMirror",
+                "http://linkedpipes.com/ontology/Output"
+            ],
+            "http://linkedpipes.com/ontology/binding": "JSONOutput",
+            "http://linkedpipes.com/ontology/requirement": {"@id": "http://linkedpipes.com/resources/requirement/workingDirectory"}
         }
     ]
 }
