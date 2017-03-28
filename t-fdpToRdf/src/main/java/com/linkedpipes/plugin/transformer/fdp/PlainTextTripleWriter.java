@@ -57,6 +57,6 @@ public class PlainTextTripleWriter {
     }
 
     public void onFileEnd() throws IOException {
-        outWriter.close();
+        outWriter.flush();
     }
 }

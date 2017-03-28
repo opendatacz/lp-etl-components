@@ -13,7 +13,8 @@ import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Resource;
 
 public class MultiAttributeDimension extends FdpDimension {
-	public static final String attributeQuery =
+
+    public static final String attributeQuery =
 			"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\r\n" +
 			"PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\r\n" +
 			"PREFIX fdp: <http://schemas.frictionlessdata.io/fiscal-data-package#>\r\n" +
@@ -25,6 +26,7 @@ public class MultiAttributeDimension extends FdpDimension {
 			"PREFIX datasets: <http://data.openbudgets.eu/datasets/>\r\n" +
 			"PREFIX fdprdf: <http://data.openbudgets.eu/fdptordf#>\r\n" +
 			"PREFIX schema: <http://schema.org/>\r\n" +
+            "PREFIX org: <http://www.w3.org/ns/org#>\r\n" +
 			"\r\n" +
 			"\r\n" +
 			"SELECT *" +
@@ -34,7 +36,7 @@ public class MultiAttributeDimension extends FdpDimension {
 			"  FILTER(?attrCount > 1)\r\n" +
 			"  \r\n" +
 			"  VALUES ( 	?valueType 			?rdfType 			?componentProperty ) {\r\n" +
-			"    ( 	   	fdprdf:organization	schema:Organization	qb:dimension	)\r\n" +
+			"    ( 	   	fdprdf:organization	org:Organization	qb:dimension	)\r\n" +
 			"    (		fdprdf:location		schema:Location		qb:attribute	)\r\n" +
 			"    (		fdprdf:unknown		UNDEF				qb:dimension	)\r\n" +
 			"    (		fdprdf:fact			UNDEF				qb:componentProperty	)\r\n" +
@@ -43,7 +45,7 @@ public class MultiAttributeDimension extends FdpDimension {
 			"  ?dsd a qb:DataStructureDefinition;\r\n" +
 			"         qb:component ?component .\r\n" +
 			"  ?component ?componentProperty _dimensionProp_;\r\n" +
-			"             fdprdf:attribute ?attribute ;\r\n" +
+			"             fdprdf:attribute ?attribute ;\r\n" + 
 			"             fdprdf:valueType ?valueType .\r\n" +
 			"             \r\n" +
 			"  \r\n" +

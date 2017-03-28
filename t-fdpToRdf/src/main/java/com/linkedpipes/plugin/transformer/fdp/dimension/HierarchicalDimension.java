@@ -151,6 +151,7 @@ public class HierarchicalDimension extends FdpDimension {
                 output.submit(attrValIRI, Mapper.VALUE_FACTORY.createIRI(FdpToRdfVocabulary.SKOS_INSCHEME), getCodelistIRI());
 
                 output.submit(getCodelistIRI(), Mapper.VALUE_FACTORY.createIRI(FdpToRdfVocabulary.A), Mapper.VALUE_FACTORY.createIRI(FdpToRdfVocabulary.SKOS_CONCEPTSCHEME));
+                output.submit(this.valueProperty, Mapper.VALUE_FACTORY.createIRI(FdpToRdfVocabulary.QB_CODELIST), getCodelistIRI());
 
                 if (orderedAttributes.indexOf(attr) == orderedAttributes.size() - 1)
                     output.submit(getCodelistIRI(), Mapper.VALUE_FACTORY.createIRI(FdpToRdfVocabulary.SKOS_HASTOPCONCEPT), attrValIRI);

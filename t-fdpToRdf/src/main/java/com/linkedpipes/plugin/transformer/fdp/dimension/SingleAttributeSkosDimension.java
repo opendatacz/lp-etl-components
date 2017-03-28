@@ -65,6 +65,7 @@ public class SingleAttributeSkosDimension extends FdpDimension {
                 output.submit(dimensionVal, Mapper.VALUE_FACTORY.createIRI(FdpToRdfVocabulary.SKOS_INSCHEME), getCodelistIRI());
                 output.submit(getCodelistIRI(), Mapper.VALUE_FACTORY.createIRI(FdpToRdfVocabulary.A), Mapper.VALUE_FACTORY.createIRI(FdpToRdfVocabulary.SKOS_CONCEPTSCHEME));
                 output.submit(getCodelistIRI(), Mapper.VALUE_FACTORY.createIRI(FdpToRdfVocabulary.SKOS_HASTOPCONCEPT), dimensionVal);
+                output.submit(this.valueProperty, Mapper.VALUE_FACTORY.createIRI(FdpToRdfVocabulary.QB_CODELIST), getCodelistIRI());
             }
 
     }
