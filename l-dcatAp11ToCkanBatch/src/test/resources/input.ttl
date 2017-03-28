@@ -13,7 +13,12 @@
 <http://km.cz> a <http://www.w3.org/2004/02/skos/core#Concept> .
 
 <http://my.catalog> a <http://www.w3.org/ns/dcat#Catalog> ;
-	<http://www.w3.org/ns/dcat#dataset> <http://real.dataset.iri> .
+	<http://www.w3.org/ns/dcat#dataset> <http://real.dataset.iri> ;
+	<http://www.w3.org/ns/dcat#record> <http://real.dataset.record.iri> .
+
+<http://real.dataset.record.iri> a dcat:CatalogRecord ;
+    <http://xmlns.com/foaf/0.1/primaryTopic> <http://real.dataset.iri> ;
+    <http://purl.org/dc/terms/source> <http://iri.on.pvs> .
 
 <http://real.dataset.iri> a <http://www.w3.org/ns/dcat#Dataset> ;
     ckan:datasetID "test99";
