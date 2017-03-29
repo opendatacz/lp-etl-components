@@ -105,6 +105,7 @@ public final class CkanPurger implements Component, SequentialExecution {
         for (String dataset : datasets) {
             LOG.info("Purging dataset " + counter + "/" + datasets.size()
                     + " : " + dataset);
+            counter++;
             try {
                 ckanManager.deleteDataset(dataset);
             } catch (CkanManager.CkanException ex) {
@@ -120,6 +121,7 @@ public final class CkanPurger implements Component, SequentialExecution {
         for (String organization : organizations) {
             LOG.info("Purging organization " + counter + "/"
                     + organizations.size() + " : " + organization);
+            counter++;
             try {
                 ckanManager.deleteOrganization(organization);
             } catch (CkanManager.CkanException ex) {
