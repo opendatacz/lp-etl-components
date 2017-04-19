@@ -14,6 +14,10 @@ public class FdpAttribute {
     private char groupSep = ' ';
 	private boolean bIsKey;
 	private Resource partialPropertyIri;
+    private String labelColumn = null;
+    private String name;
+
+
 	public Resource getPartialPropertyIri(){
 		return partialPropertyIri; // Mapper.VALUE_FACTORY.createIri(partialPropertyIri);
 	}
@@ -59,4 +63,13 @@ public class FdpAttribute {
         }
         return result;
     }
+
+    public String getLabelColumn() { return labelColumn; }
+    public void setLabel(String labelColumn) {
+        this.labelColumn = labelColumn;
+    }
+
+    public String getName() {return this.name;}
+    public void setName(String name) {this.name = name;}
+
 }

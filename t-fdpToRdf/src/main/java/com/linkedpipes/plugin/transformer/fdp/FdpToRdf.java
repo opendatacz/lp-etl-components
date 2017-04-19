@@ -205,9 +205,17 @@ public final class FdpToRdf implements Component, SequentialExecution {
                 		bs.getBinding("sourceFile").getValue().stringValue(),
                 		((Literal) bs.getBinding("iskey").getValue()).booleanValue(),
                 		(Resource) bs.getBinding("attributeValueProperty").getValue());
+                if(bs.getBinding("attributeName") != null) {
+                    attr.setName(bs.getBinding("attributeName").getValue().stringValue());
+                }
                 attributes.add(attr);
     		}
     		dim.setAttributes(attributes);
+
+            execQuery(dim.getLabelsQuery());
+            for(BindingSet bs : currentResult) {
+                dim.addLabel(bs.getBinding("labelForName").getValue().stringValue(), bs.getBinding("sourceColumn").getValue().stringValue());
+            }
     	}
         for(HierarchicalDimension dim : hierarchicalDimensions) {
             List<FdpAttribute> attributes = new ArrayList<FdpAttribute>();

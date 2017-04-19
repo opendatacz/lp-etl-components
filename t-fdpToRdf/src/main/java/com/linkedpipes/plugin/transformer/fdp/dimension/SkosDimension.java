@@ -62,6 +62,7 @@ public class SkosDimension extends FdpDimension {
             "\t\t\t fdprdf:sourceFile ?sourceFile;\n" +
             "\t\t\t fdprdf:iskey ?iskey;\n" +
             "             fdprdf:valueProperty ?attributeValueProperty;\n" +
+                    "             fdprdf:name ?attributeName .      \n" +
             "FILTER NOT EXISTS {?attribute fdprdf:isHierarchical true .}  \n" +
             "}";
 
@@ -73,15 +74,24 @@ public class SkosDimension extends FdpDimension {
 
     public void processRow(IRI observation, HashMap<String, String> row, ExceptionFactory exceptionFactory) throws LpException, IOException {
         Resource dimensionVal = createValueIri(row);
+        boolean weHaveLabel = false;
         for(FdpAttribute attr : attributes) {
             String attrVal = row.get(attr.getColumn());
+            if(attr.getLabelColumn() != null) {
+                weHaveLabel = true;
+                String attrLabel = row.get(attr.getLabelColumn());
+                output.submit(dimensionVal, Mapper.VALUE_FACTORY.createIRI(FdpToRdfVocabulary.SKOS_PREFLABEL), Mapper.VALUE_FACTORY.createLiteral(attrLabel));
+            }
             if(attrVal != null) {
-                output.submit(dimensionVal, Mapper.VALUE_FACTORY.createIRI(attr.getPartialPropertyIri().stringValue()), Mapper.VALUE_FACTORY.createLiteral(attrVal));
+                if(weHaveLabel) {
+                    output.submit(dimensionVal, Mapper.VALUE_FACTORY.createIRI(FdpToRdfVocabulary.SKOS_NOTATION), Mapper.VALUE_FACTORY.createLiteral(attrVal));
+                }
+                else output.submit(dimensionVal, Mapper.VALUE_FACTORY.createIRI(attr.getPartialPropertyIri().stringValue()), Mapper.VALUE_FACTORY.createLiteral(attrVal));
             }
         }
         output.submit(observation, this.valueProperty, dimensionVal);
         output.submit(dimensionVal, Mapper.VALUE_FACTORY.createIRI(FdpToRdfVocabulary.A), Mapper.VALUE_FACTORY.createIRI(FdpToRdfVocabulary.SKOS_CONCEPT));
-        output.submit(dimensionVal, Mapper.VALUE_FACTORY.createIRI(FdpToRdfVocabulary.SKOS_PREFLABEL), Mapper.VALUE_FACTORY.createLiteral(mergedPrimaryKey(row)));
+        if(weHaveLabel == false) output.submit(dimensionVal, Mapper.VALUE_FACTORY.createIRI(FdpToRdfVocabulary.SKOS_PREFLABEL), Mapper.VALUE_FACTORY.createLiteral(mergedPrimaryKey(row)));
         output.submit(dimensionVal, Mapper.VALUE_FACTORY.createIRI(FdpToRdfVocabulary.SKOS_INSCHEME), getCodelistIRI());
         output.submit(getCodelistIRI(), Mapper.VALUE_FACTORY.createIRI(FdpToRdfVocabulary.A), Mapper.VALUE_FACTORY.createIRI(FdpToRdfVocabulary.SKOS_CONCEPTSCHEME));
         output.submit(getCodelistIRI(), Mapper.VALUE_FACTORY.createIRI(FdpToRdfVocabulary.SKOS_HASTOPCONCEPT), dimensionVal);

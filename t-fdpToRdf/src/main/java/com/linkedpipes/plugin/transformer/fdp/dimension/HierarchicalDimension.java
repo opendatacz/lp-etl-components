@@ -59,23 +59,7 @@ public class HierarchicalDimension extends FdpDimension {
                     "  FILTER NOT EXISTS {?attribute fdprdf:labelfor [] .}\n" +
                     "}";
 
-    public static final String labelQuery = "PREFIX qb: <http://purl.org/linked-data/cube#>\n" +
-            "PREFIX fdprdf: <http://data.openbudgets.eu/fdptordf#>\n" +
-            "\n" +
-            "SELECT *\n" +
-            "WHERE {\n" +
-            "  ?component qb:dimension _dimensionProp_;\n" +
-            "             fdprdf:attribute ?attribute ;\n" +
-            "             fdprdf:valueType fdprdf:skos .             \n" +
-            "  \n" +
-            "  ?attribute fdprdf:sourceColumn ?sourceColumn ;\n" +
-            "\t\t\t fdprdf:sourceFile ?sourceFile;\n" +
-            "\t\t\t fdprdf:iskey ?iskey;\n" +
-            "             fdprdf:valueProperty ?attributeValueProperty;\n" +
-            "             fdprdf:name ?attributeName ;      \n" +
-            "       \t\t fdprdf:labelfor ?labelForName ;\n" +
-            "             fdprdf:source ?labelProperty .\n" +
-            "}";
+
 
     private List<FdpHierarchicalAttribute> orderedAttributes;
 
@@ -85,14 +69,6 @@ public class HierarchicalDimension extends FdpDimension {
         return this.attributeQuery;
     }
 
-    public String getLabelsQuery() {return insertDimensionIRI(labelQuery); }
-
-    public void addLabel(String forAttribute, String labelColumn) {
-        for(FdpAttribute attr : attributes) {
-            FdpHierarchicalAttribute hAttr = (FdpHierarchicalAttribute) attr;
-            if(hAttr.getName().equals(forAttribute)) hAttr.setLabel(labelColumn);
-        }
-    }
 
     private FdpHierarchicalAttribute getAttrByName(String name) {
         if(name == null) return null;

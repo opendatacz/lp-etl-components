@@ -63,7 +63,7 @@
         <profile>
             <id>otherOutputDir</id>
             <build>
-                <directory>C:\apps\etl-devel3\etl\deploy\jars\t-fdpToRdf</directory>
+                <directory>C:\apps\etl-4\etl\deploy\jars</directory>
             </build>
         </profile>
     </profiles>
