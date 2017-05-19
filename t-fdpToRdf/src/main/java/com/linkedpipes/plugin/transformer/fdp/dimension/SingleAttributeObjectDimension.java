@@ -76,13 +76,18 @@ public class SingleAttributeObjectDimension extends FdpDimension {
 
     public void processRow(IRI observation, HashMap<String, String> row, ExceptionFactory exceptionFactory) throws LpException, IOException {
         Resource dimensionVal = createValueIri(row);
-        if(valueType!=null) output.submit(dimensionVal, Mapper.VALUE_FACTORY.createIRI(FdpToRdfVocabulary.A), valueType);
+        boolean weHaveSomeValue = false;
         for(FdpAttribute attr : attributes) {
             String attrVal = row.get(attr.getColumn());
             if(attrVal != null) {
                 output.submit(dimensionVal, Mapper.VALUE_FACTORY.createIRI(FdpToRdfVocabulary.SCHEMA_NAME), Mapper.VALUE_FACTORY.createLiteral(attrVal));
+                weHaveSomeValue = true;
             }
         }
-        output.submit(observation, this.valueProperty, dimensionVal);
+        if(weHaveSomeValue) {
+            if (valueType != null)
+                output.submit(dimensionVal, Mapper.VALUE_FACTORY.createIRI(FdpToRdfVocabulary.A), valueType);
+            output.submit(observation, this.valueProperty, dimensionVal);
+        }
     }
 }
