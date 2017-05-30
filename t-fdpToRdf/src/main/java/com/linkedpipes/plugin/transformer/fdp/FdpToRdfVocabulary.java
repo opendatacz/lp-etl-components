@@ -14,6 +14,8 @@ public final class FdpToRdfVocabulary {
     public static final String SCHEMA = "http://schema.org/";
     public static final String TIME = "http://www.w3.org/2006/time#";
     public static final String QB = "http://purl.org/linked-data/cube#";
+    public static final String OBEU_DIMENSION = "http://data.openbudgets.eu/ontology/dsd/dimension/";
+    public static final String OBEU_ATTRIBUTUE = "http://data.openbudgets.eu/ontology/dsd/attribute/";
 
     public static final String A = RDF + "type";
     public static final String SKOS_CONCEPT = SKOS + "Concept";
@@ -32,6 +34,12 @@ public final class FdpToRdfVocabulary {
     public static final String QB_OBSERVATION_TYPE = QB + "Observation";
     public static final String QB_DATASET = QB + "dataSet";
     public static final String QB_CODELIST = QB + "codeList";
+    public static final String QB_MEASURE_TYPE = QB + "measureType";
+
+    public static final String OBEU_DIMENSION_CURRENCY = OBEU_DIMENSION + "currency";
+    public static final String OBEU_ATTRIBUTE_CURRENCY = OBEU_ATTRIBUTUE + "currency";
+    public static final String OBEU_DIMENSION_OPERATIONCHARACTER = OBEU_DIMENSION + "operationCharacter";
+    public static final String OBEU_DIMENSION_BUDGETPHASE = OBEU_DIMENSION + "budgetPhase";
 
     private FdpToRdfVocabulary() {
     }

@@ -185,12 +185,19 @@ public final class FdpToRdf implements Component, SequentialExecution {
             FdpMeasure newMeasure = new FdpMeasure(output,
                     ((Literal)bs.getBinding("measureFactor").getValue()).doubleValue(),
                     bs.getBinding("measureProperty").getValue().stringValue(),
+                    bs.getBinding("measureName").getValue().stringValue(),
                     bs.getBinding("sourceColumn").getValue().stringValue(),
                     bs.getBinding("sourceFile").getValue().stringValue());
             Binding decimalCharBinding = bs.getBinding("decimalChar");
             Binding groupCharBinding = bs.getBinding("groupChar");
+            Binding currencyBinding = bs.getBinding("currency");
+            Binding operationCharBinding = bs.getBinding("operationCharacter");
+            Binding budgetPhaseBinding = bs.getBinding("budgetPhase");
             if(decimalCharBinding != null) newMeasure.setDecimalSep(decimalCharBinding.getValue().stringValue().charAt(0));
             if(groupCharBinding != null) newMeasure.setGroupSep(groupCharBinding.getValue().stringValue().charAt(0));
+            if(currencyBinding != null) newMeasure.setCurrency((IRI) currencyBinding.getValue());
+            if(operationCharBinding != null) newMeasure.setOperationChar((IRI) operationCharBinding.getValue());
+            if(budgetPhaseBinding != null) newMeasure.setBudgetPhase((IRI) budgetPhaseBinding.getValue());
             measures.add(newMeasure);
         }
     }
