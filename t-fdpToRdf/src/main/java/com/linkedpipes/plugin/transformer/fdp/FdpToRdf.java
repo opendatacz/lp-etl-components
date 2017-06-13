@@ -75,6 +75,7 @@ public final class FdpToRdf implements Component, SequentialExecution {
 
     private String datasetIRI;
     private String packageName;
+    private boolean outputCurrencyAsDimension = false;
 
     private List<BindingSet> execQuery(String queryText) throws LpException {
     	try{
@@ -111,6 +112,8 @@ public final class FdpToRdf implements Component, SequentialExecution {
         Binding datasetBinding = currentResult.get(0).getBinding("dataset");
         Binding packageNameBinding = currentResult.get(0).getBinding("packageName");
         if(datasetBinding == null) throw exceptionFactory.failure("Dataset IRI not found in metadata.");
+        Binding hasCurrencyDimension = currentResult.get(0).getBinding("hasCurrencyDimension");
+        if(hasCurrencyDimension!=null) outputCurrencyAsDimension = true;
         datasetIRI = datasetBinding.getValue().stringValue();
         packageName = packageNameBinding.getValue().stringValue();
     }
@@ -198,6 +201,7 @@ public final class FdpToRdf implements Component, SequentialExecution {
             if(currencyBinding != null) newMeasure.setCurrency((IRI) currencyBinding.getValue());
             if(operationCharBinding != null) newMeasure.setOperationChar((IRI) operationCharBinding.getValue());
             if(budgetPhaseBinding != null) newMeasure.setBudgetPhase((IRI) budgetPhaseBinding.getValue());
+            newMeasure.setOutputCurrencyDimension(outputCurrencyAsDimension);
             measures.add(newMeasure);
         }
     }

@@ -16,6 +16,8 @@ public final class FdpToRdfVocabulary {
     public static final String QB = "http://purl.org/linked-data/cube#";
     public static final String OBEU_DIMENSION = "http://data.openbudgets.eu/ontology/dsd/dimension/";
     public static final String OBEU_ATTRIBUTUE = "http://data.openbudgets.eu/ontology/dsd/attribute/";
+    public static final String OBEU_MEASURE = "http://data.openbudgets.eu/ontology/dsd/measure/";
+    public static final String OBEU_AMOUNT = OBEU_MEASURE + "amount";
 
     public static final String A = RDF + "type";
     public static final String SKOS_CONCEPT = SKOS + "Concept";

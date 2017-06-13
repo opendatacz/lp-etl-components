@@ -63,7 +63,7 @@ public class Mapper {
     }
 
     private IRI getObservationUri(String measureName) {
-        return VALUE_FACTORY.createIRI(datasetIri+"/observation/forMeasure_"+measureName+"/"+rowNumber);
+        return VALUE_FACTORY.createIRI(datasetIri+"/observation/"+rowNumber+"/for-"+measureName);
     }
 
     /**
