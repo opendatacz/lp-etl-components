@@ -106,7 +106,8 @@ public abstract class FdpDimension {
 	public static String urlEncode(String val)
 	{
 		try {
-			return URLEncoder.encode(val, "UTF-8");
+			String valPreproc = val.replace(' ', '-');
+			return URLEncoder.encode(valPreproc, "UTF-8");
 		}
 		catch(Exception e) {
 			return null;
