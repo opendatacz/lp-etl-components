@@ -100,6 +100,7 @@ public class SkosDimension extends FdpDimension {
             output.submit(dimensionVal, Mapper.VALUE_FACTORY.createIRI(FdpToRdfVocabulary.SKOS_INSCHEME), getCodelistIRI());
             output.submit(getCodelistIRI(), Mapper.VALUE_FACTORY.createIRI(FdpToRdfVocabulary.A), Mapper.VALUE_FACTORY.createIRI(FdpToRdfVocabulary.SKOS_CONCEPTSCHEME));
             output.submit(getCodelistIRI(), Mapper.VALUE_FACTORY.createIRI(FdpToRdfVocabulary.SKOS_HASTOPCONCEPT), dimensionVal);
+            output.submit(getCodelistIRI(), Mapper.VALUE_FACTORY.createIRI(FdpToRdfVocabulary.RDFS_LABEL), Mapper.VALUE_FACTORY.createLiteral(name));
             output.submit(this.valueProperty, Mapper.VALUE_FACTORY.createIRI(FdpToRdfVocabulary.QB_CODELIST), getCodelistIRI());
         }
     }

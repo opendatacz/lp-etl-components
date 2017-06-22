@@ -9,6 +9,7 @@ public final class FdpToRdfVocabulary {
 
     public static final String HAS_FILE_NAME = PREFIX + "fileName";
 
+    public static final String RDFS = "http://www.w3.org/2000/01/rdf-schema#";
     public static final String RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
     public static final String SKOS = "http://www.w3.org/2004/02/skos/core#";
     public static final String SCHEMA = "http://schema.org/";
@@ -18,6 +19,8 @@ public final class FdpToRdfVocabulary {
     public static final String OBEU_ATTRIBUTUE = "http://data.openbudgets.eu/ontology/dsd/attribute/";
     public static final String OBEU_MEASURE = "http://data.openbudgets.eu/ontology/dsd/measure/";
     public static final String OBEU_AMOUNT = OBEU_MEASURE + "amount";
+
+    public static final String RDFS_LABEL = RDFS + "label";
 
     public static final String A = RDF + "type";
     public static final String SKOS_CONCEPT = SKOS + "Concept";

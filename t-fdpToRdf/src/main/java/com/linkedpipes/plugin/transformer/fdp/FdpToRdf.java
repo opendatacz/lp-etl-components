@@ -33,6 +33,8 @@ import org.supercsv.prefs.CsvPreference;
 
 public final class FdpToRdf implements Component, SequentialExecution {
 
+    private static final String VERSION = "FdpToRdf-v0.8.0_1:";
+
     private static final String FILE_ENCODE = "UTF-8";
 
     private static final ValueFactory VALUE_FACTORY
@@ -101,17 +103,17 @@ public final class FdpToRdf implements Component, SequentialExecution {
     	});
     	}
     	catch(Exception ex) {
-    		 throw exceptionFactory.failure("Can't extract metadata, the failure query was: \r\n {}", queryText);
+    		 throw exceptionFactory.failure(VERSION+"Can't extract metadata, the failure query was: \r\n {}", queryText);
     	}
     	return currentResult;
     }
 
     private void extractDataset() throws LpException {
         execQuery(FdpMeasure.query);
-        if(currentResult.size() == 0) throw exceptionFactory.failure("Dataset IRI not found in metadata.");
+        if(currentResult.size() == 0) throw exceptionFactory.failure(VERSION+"Dataset IRI not found in metadata.");
         Binding datasetBinding = currentResult.get(0).getBinding("dataset");
         Binding packageNameBinding = currentResult.get(0).getBinding("packageName");
-        if(datasetBinding == null) throw exceptionFactory.failure("Dataset IRI not found in metadata.");
+        if(datasetBinding == null) throw exceptionFactory.failure(VERSION+"Dataset IRI not found in metadata.");
         Binding hasCurrencyDimension = currentResult.get(0).getBinding("hasCurrencyDimension");
         if(hasCurrencyDimension!=null) outputCurrencyAsDimension = true;
         datasetIRI = datasetBinding.getValue().stringValue();
@@ -120,7 +122,7 @@ public final class FdpToRdf implements Component, SequentialExecution {
 
     private CsvPreference extractHeader(String resourcePath) throws LpException {
         execQuery(HeaderParser.resourceQuery(resourcePath));
-        if(currentResult.size() ==0) throw exceptionFactory.failure("Cannot read resource schema.");
+        if(currentResult.size() ==0) throw exceptionFactory.failure(VERSION+"Cannot read resource schema.");
         Binding delimiterBinding = currentResult.get(0).getBinding("delimiter");
         Binding quoteCharBinding = currentResult.get(0).getBinding("quoteChar");
         HeaderParser headerParser = new HeaderParser();
@@ -277,7 +279,7 @@ public final class FdpToRdf implements Component, SequentialExecution {
             output = new PlainTextTripleWriter(outWriter);
         }
         catch (IOException ex){
-            throw exceptionFactory.failure("Can't initialize file for data output.", ex);
+            throw exceptionFactory.failure(VERSION+"Can't initialize file for data output.", ex);
         }
 
         final Parser parser = new Parser(exceptionFactory);
@@ -292,7 +294,7 @@ public final class FdpToRdf implements Component, SequentialExecution {
 
         //output.onFileStart();
 
-        if(inputFilesDataUnit.size() > 2) throw exceptionFactory.failure("Only one CSV file is supported at the moment.");
+        if(inputFilesDataUnit.size() > 2) throw exceptionFactory.failure(VERSION+"Only one CSV file is supported at the moment.");
         for (Entry entry : inputFilesDataUnit) {
 
             LOG.info("Processing file: {}", entry.toFile());
@@ -308,7 +310,7 @@ public final class FdpToRdf implements Component, SequentialExecution {
                     outputStream.flush();
                 }
             } catch (Exception ex) {
-                throw exceptionFactory.failure("Can't process file: {}",
+                throw exceptionFactory.failure(VERSION+"Can't process file: {}",
                         entry.getFileName(), ex);
             }
         }
@@ -316,7 +318,7 @@ public final class FdpToRdf implements Component, SequentialExecution {
         try {
             outputStream.close();
         } catch (IOException e) {
-            throw exceptionFactory.failure("Can't close output file.", e);
+            throw exceptionFactory.failure(VERSION+"Can't close output file.", e);
         }
     }
 

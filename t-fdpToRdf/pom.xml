@@ -9,7 +9,7 @@
     </parent>
     <groupId>com.linkedpipes</groupId>
     <artifactId>t-fdpToRdf</artifactId>
-    <version>0.0.0</version>
+    <version>0.8.0</version>
     <packaging>bundle</packaging>
     <name>plugin t-fdpToRdf</name>
 
