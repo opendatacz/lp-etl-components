@@ -13,12 +13,12 @@ public class DcatAp11ToCkanBatchTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(DcatAp11ToCkanBatchTest.class);
 
-    @Test
+    //@Test
     public void loadTest() throws Exception {
         final DcatAp11ToCkanBatch component = new DcatAp11ToCkanBatch();
         component.configuration = new DcatAp11ToCkanBatchConfiguration();
-        component.configuration.setApiUri("http://xrg11.ms.mff.cuni.cz:5221/api/3/action");
-        component.configuration.setApiKey("a480d6ec-3a73-48b8-bb8a-3ab1cc88b646");
+        component.configuration.setApiUri("");
+        component.configuration.setApiKey("");
         component.configuration.setLoadLanguage("cs");
         component.configuration.setToApi(true);
         component.configuration.setToFile(false);

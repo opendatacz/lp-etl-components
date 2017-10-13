@@ -258,8 +258,10 @@ public final class DcatAp11ToCkanBatch implements Component, SequentialExecution
             String publisher_uri = executeSimpleSelectQuery("SELECT ?publisher_uri WHERE {<" + datasetURI + "> <" + DCTERMS.PUBLISHER + "> ?publisher_uri }", "publisher_uri");
             String publisher_name = executeSimpleSelectQuery("SELECT ?publisher_name WHERE {<" + datasetURI + "> <" + DCTERMS.PUBLISHER + ">/<" + FOAF.NAME + "> ?publisher_name FILTER(LANGMATCHES(LANG(?publisher_name), \"" + configuration.getLoadLanguage() + "\"))}", "publisher_name");
 
+            String ckan_organization_id = executeSimpleSelectQuery("SELECT ?orgid WHERE {<" + datasetURI + "> <" + DcatAp11ToCkanBatchVocabulary.LODCZCKAN_ORGANIZATION_ID + "> ?orgid }", "orgid");
+
             //This is done even if getToApi is false, because there is no way to generate a file with organizations without getting their actual CKAN ID, so we need to create them here
-            if (!organizations.containsKey(publisher_uri)) {
+            if ((ckan_organization_id == null || ckan_organization_id.isEmpty()) && !organizations.containsKey(publisher_uri)) {
                 LOG.debug("Creating organization " + publisher_uri);
                 JSONObject root = new JSONObject();
 
@@ -506,8 +508,12 @@ public final class DcatAp11ToCkanBatch implements Component, SequentialExecution
 
             root.put("resources", resources);
 
-            //Check whether this creates the dataset ok - it is mainly for the output file
-            root.put("owner_org", organizations.get(publisher_uri));
+            if (ckan_organization_id == null || ckan_organization_id.isEmpty()) {
+                //Check whether this creates the dataset ok - it is mainly for the output file
+                root.put("owner_org", organizations.get(publisher_uri));
+            } else { //Overriden
+                root.put("owner_org", ckan_organization_id);
+            }
 
             //Create new dataset
             if (configuration.getToApi() && !datasetExists) {

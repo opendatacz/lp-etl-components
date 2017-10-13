@@ -42,6 +42,7 @@
 
 <http://real.dataset.iri/2> a <http://www.w3.org/ns/dcat#Dataset> ;
     ckan:datasetID "test100";
+    ckan:organizationID "ooo2";
 	<http://data.europa.eu/(xyz)/statdcat-ap/attribute> <http://att1.cz> , <http://att2.cz> ;
 	<http://data.europa.eu/(xyz)/statdcat-ap/dimension> <http://dim1.cz> , <http://dim2.cz> ;
 	<http://data.europa.eu/(xyz)/statdcat-ap/numSeries> 9 ;
@@ -53,7 +54,7 @@
 	<http://purl.org/dc/terms/language> <http://publications.europa.eu/resource/authority/language/ENG> ;
 	<http://purl.org/dc/terms/modified> "2016-07-25"^^<http://www.w3.org/2001/XMLSchema#date> ;
 	<http://purl.org/dc/terms/publisher> <https://cssz.cz> ;
-	<http://purl.org/dc/terms/title> "Dataset title"@en ;
+	<http://purl.org/dc/terms/title> "Dataset2 title"@en ;
 	<http://purl.org/dc/terms/spatial> <http://spatialX.cz> , <http://spatialX.de> ;
 	<http://purl.org/dc/terms/temporal> <http://real.dataset.iri/distribution/temporal> ;
 	<http://www.w3.org/ns/dcat#contactPoint> <http://real.dataset.iri/contactPoint> ;
