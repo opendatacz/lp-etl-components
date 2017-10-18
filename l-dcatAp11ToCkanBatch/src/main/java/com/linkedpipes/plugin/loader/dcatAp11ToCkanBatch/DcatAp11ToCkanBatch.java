@@ -508,12 +508,15 @@ public final class DcatAp11ToCkanBatch implements Component, SequentialExecution
 
             root.put("resources", resources);
 
+            String owner_org;
+
             if (ckan_organization_id == null || ckan_organization_id.isEmpty()) {
                 //Check whether this creates the dataset ok - it is mainly for the output file
-                root.put("owner_org", organizations.get(publisher_uri));
+                owner_org = organizations.get(publisher_uri);
             } else { //Overriden
-                root.put("owner_org", ckan_organization_id);
+                owner_org = ckan_organization_id;
             }
+            root.put("owner_org", owner_org);
 
             //Create new dataset
             if (configuration.getToApi() && !datasetExists) {
@@ -522,7 +525,7 @@ public final class DcatAp11ToCkanBatch implements Component, SequentialExecution
 
                 createRoot.put("name", datasetID);
                 createRoot.put("title", title);
-                createRoot.put("owner_org", organizations.get(publisher_uri));
+                createRoot.put("owner_org", owner_org);
 
                 LOG.debug("Creating dataset in CKAN");
                 HttpPost httpPost = new HttpPost(apiURI + "/package_create?id=" + datasetID);
