@@ -22,6 +22,37 @@ public abstract class FdpDimension {
 	protected String datasetName;
 	protected IRI valueType = null;
 
+	public static final String labelQuery = "PREFIX qb: <http://purl.org/linked-data/cube#>\n" +
+			"PREFIX fdprdf: <http://data.openbudgets.eu/fdptordf#>\n" +
+			"\n" +
+			"SELECT *\n" +
+			"WHERE {\n" +
+			"  ?component qb:dimension _dimensionProp_;\n" +
+			"             fdprdf:attribute ?attribute ;\n" +
+			"             fdprdf:valueType fdprdf:skos .             \n" +
+			"  \n" +
+			"  ?attribute fdprdf:sourceColumn ?sourceColumn ;\n" +
+			"\t\t\t fdprdf:sourceFile ?sourceFile;\n" +
+			"\t\t\t fdprdf:iskey ?iskey;\n" +
+			"             fdprdf:valueProperty ?attributeValueProperty;\n" +
+			"             fdprdf:name ?attributeName ;      \n" +
+			"       \t\t fdprdf:labelfor ?labelForName ;\n" +
+			"             fdprdf:source ?labelProperty .\n" +
+			"}";
+
+
+	public String getLabelsQuery() {return insertDimensionIRI(labelQuery); }
+
+
+	public void addLabel(String forAttribute, String labelColumn) {
+		FdpAttribute labelAttribute = null;
+		for(FdpAttribute attr : attributes) {
+			if(attr.getName().equals(forAttribute)) attr.setLabel(labelColumn);
+			if(attr.getColumn().equals(labelColumn)) labelAttribute = attr;
+		}
+		attributes.remove(labelAttribute);
+	}
+
 	public String getDimensionValIriBase() {
 		return datasetIri+"/"+name+"/";
 	}
@@ -75,7 +106,8 @@ public abstract class FdpDimension {
 	public static String urlEncode(String val)
 	{
 		try {
-			return URLEncoder.encode(val, "UTF-8");
+			String valPreproc = val.replace(' ', '-');
+			return URLEncoder.encode(valPreproc, "UTF-8");
 		}
 		catch(Exception e) {
 			return null;

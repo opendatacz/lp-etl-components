@@ -52,7 +52,6 @@ public class Mapper {
      * than onRowStart, onRowEnd and submit for new statement.
      *
      * @param consumer
-     * @param columns
      */
     Mapper(PlainTextTripleWriter consumer, ExceptionFactory exceptionFactory, List<FdpDimension> dimensions,
            List<FdpMeasure> measures, String datasetIri) {
@@ -63,8 +62,8 @@ public class Mapper {
         this.datasetIri = datasetIri;
     }
 
-    private IRI getObservationUri() {
-        return VALUE_FACTORY.createIRI(datasetIri+"/observation/"+rowNumber);
+    private IRI getObservationUri(String measureName) {
+        return VALUE_FACTORY.createIRI(datasetIri+"/observation/"+rowNumber+"/for-"+measureName);
     }
 
     /**
@@ -96,18 +95,20 @@ public class Mapper {
         	i++;
         }
         for(FdpDimension dim : dimensions) {
-        	dim.processRow(getObservationUri(), rowHash, exceptionFactory);
+            for(FdpMeasure measure : measures) {
+                dim.processRow(getObservationUri(measure.getName()), rowHash, exceptionFactory);
+            }
         }
         for(FdpMeasure measure : measures) {
-            measure.processRow(getObservationUri(), rowHash, exceptionFactory);
-        }
+            measure.processRow(getObservationUri(measure.getName()), rowHash, exceptionFactory);
 
             consumer.submit(VALUE_FACTORY.createIRI(datasetIri), VALUE_FACTORY.createIRI(FdpToRdfVocabulary.QB_OBSERVATION),
-                    getObservationUri());
-            consumer.submit(getObservationUri(), VALUE_FACTORY.createIRI(FdpToRdfVocabulary.A),
+                    getObservationUri(measure.getName()));
+            consumer.submit(getObservationUri(measure.getName()), VALUE_FACTORY.createIRI(FdpToRdfVocabulary.A),
                     VALUE_FACTORY.createIRI(FdpToRdfVocabulary.QB_OBSERVATION_TYPE));
-            consumer.submit(getObservationUri(), VALUE_FACTORY.createIRI(FdpToRdfVocabulary.QB_DATASET),
+            consumer.submit(getObservationUri(measure.getName()), VALUE_FACTORY.createIRI(FdpToRdfVocabulary.QB_DATASET),
                     VALUE_FACTORY.createIRI(datasetIri));
+        }
 
         return true;
     }
