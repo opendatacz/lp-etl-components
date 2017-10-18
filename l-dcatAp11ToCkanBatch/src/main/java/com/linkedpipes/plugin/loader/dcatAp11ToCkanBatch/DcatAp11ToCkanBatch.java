@@ -29,6 +29,7 @@ import org.apache.http.impl.client.LaxRedirectStrategy;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.util.EntityUtils;
 import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.vocabulary.DCAT;
 import org.eclipse.rdf4j.model.vocabulary.DCTERMS;
 import org.eclipse.rdf4j.model.vocabulary.FOAF;
 import org.eclipse.rdf4j.model.vocabulary.SKOS;
@@ -166,7 +167,7 @@ public final class DcatAp11ToCkanBatch implements Component, SequentialExecution
         LOG.debug("Querying metadata for datasets");
 
         LinkedList<String> datasets = new LinkedList<>();
-        for (Map<String,Value> map: executeSelectQuery("SELECT ?d WHERE {?d a <" + DcatAp11ToCkanBatchVocabulary.DCAT_DATASET_CLASS + ">}")) {
+        for (Map<String,Value> map: executeSelectQuery("SELECT ?d WHERE {?d a <" + DCAT.DATASET + ">}")) {
             datasets.add(map.get("d").stringValue());
         }
 
@@ -250,15 +251,17 @@ public final class DcatAp11ToCkanBatch implements Component, SequentialExecution
             }
 
             LinkedList<String> keywords = new LinkedList<>();
-            for (Map<String, Value> map : executeSelectQuery("SELECT ?keyword WHERE {<" + datasetURI + "> <" + DcatAp11ToCkanBatchVocabulary.DCAT_KEYWORD + "> ?keyword FILTER(LANGMATCHES(LANG(?keyword), \"" + configuration.getLoadLanguage() + "\"))}")) {
+            for (Map<String, Value> map : executeSelectQuery("SELECT ?keyword WHERE {<" + datasetURI + "> <" + DCAT.KEYWORD + "> ?keyword FILTER(LANGMATCHES(LANG(?keyword), \"" + configuration.getLoadLanguage() + "\"))}")) {
                 keywords.add(map.get("keyword").stringValue());
             }
 
             String publisher_uri = executeSimpleSelectQuery("SELECT ?publisher_uri WHERE {<" + datasetURI + "> <" + DCTERMS.PUBLISHER + "> ?publisher_uri }", "publisher_uri");
             String publisher_name = executeSimpleSelectQuery("SELECT ?publisher_name WHERE {<" + datasetURI + "> <" + DCTERMS.PUBLISHER + ">/<" + FOAF.NAME + "> ?publisher_name FILTER(LANGMATCHES(LANG(?publisher_name), \"" + configuration.getLoadLanguage() + "\"))}", "publisher_name");
 
+            String ckan_organization_id = executeSimpleSelectQuery("SELECT ?orgid WHERE {<" + datasetURI + "> <" + DcatAp11ToCkanBatchVocabulary.LODCZCKAN_ORGANIZATION_ID + "> ?orgid }", "orgid");
+
             //This is done even if getToApi is false, because there is no way to generate a file with organizations without getting their actual CKAN ID, so we need to create them here
-            if (!organizations.containsKey(publisher_uri)) {
+            if ((ckan_organization_id == null || ckan_organization_id.isEmpty()) && !organizations.containsKey(publisher_uri)) {
                 LOG.debug("Creating organization " + publisher_uri);
                 JSONObject root = new JSONObject();
 
@@ -342,21 +345,13 @@ public final class DcatAp11ToCkanBatch implements Component, SequentialExecution
             if (!description.isEmpty()) {
                 root.put("notes", description);
             }
-            String contactPoint = executeSimpleSelectQuery("SELECT ?contact WHERE {<" + datasetURI + "> <" + DcatAp11ToCkanBatchVocabulary.DCAT_CONTACT_POINT + ">/<" + DcatAp11ToCkanBatchVocabulary.VCARD_HAS_EMAIL + "> ?contact }", "contact");
+            String contactPoint = executeSimpleSelectQuery("SELECT ?contact WHERE {<" + datasetURI + "> <" + DCAT.CONTACT_POINT + ">/<" + DcatAp11ToCkanBatchVocabulary.VCARD_HAS_EMAIL + "> ?contact }", "contact");
             if (!contactPoint.isEmpty()) {
                 root.put("maintainer_email", contactPoint);
             }
-            String curatorName = executeSimpleSelectQuery("SELECT ?name WHERE {<" + datasetURI + "> <" + DcatAp11ToCkanBatchVocabulary.DCAT_CONTACT_POINT + ">/<" + DcatAp11ToCkanBatchVocabulary.VCARD_FN + "> ?name }", "name");
+            String curatorName = executeSimpleSelectQuery("SELECT ?name WHERE {<" + datasetURI + "> <" + DCAT.CONTACT_POINT + ">/<" + DcatAp11ToCkanBatchVocabulary.VCARD_FN + "> ?name }", "name");
             if (!curatorName.isEmpty()) {
                 root.put("maintainer", curatorName);
-            }
-            String issued = executeSimpleSelectQuery("SELECT ?issued WHERE {<" + datasetURI + "> <" + DCTERMS.ISSUED + "> ?issued }", "issued");
-            if (!issued.isEmpty()) {
-                root.put("metadata_created", issued);
-            }
-            String modified = executeSimpleSelectQuery("SELECT ?modified WHERE {<" + datasetURI + "> <" + DCTERMS.MODIFIED + "> ?modified }", "modified");
-            if (!modified.isEmpty()) {
-                root.put("metadata_modified", modified);
             }
 
             if (configuration.getProfile().equals(DcatAp11ToCkanBatchVocabulary.PROFILES_NKOD.stringValue())) {
@@ -366,7 +361,18 @@ public final class DcatAp11ToCkanBatch implements Component, SequentialExecution
                 if (!publisher_name.isEmpty()) {
                     root.put("publisher_name", publisher_name);
                 }
-
+                String issued = executeSimpleSelectQuery("SELECT ?issued WHERE {<" + datasetURI + "> <" + DCTERMS.ISSUED + "> ?issued }", "issued");
+                if (!issued.isEmpty()) {
+                    root.put("real_issued", issued);
+                }
+                String modified = executeSimpleSelectQuery("SELECT ?modified WHERE {<" + datasetURI + "> <" + DCTERMS.MODIFIED + "> ?modified }", "modified");
+                if (!modified.isEmpty()) {
+                    root.put("real_modified", modified);
+                }
+                String nkodlink = executeSimpleSelectQuery("SELECT ?source WHERE {<" + datasetURI + "> ^<" + FOAF.PRIMARY_TOPIC + ">/<" + DCTERMS.SOURCE +"> ?source }", "source");
+                if (!nkodlink.isEmpty()) {
+                    root.put("nkod_link", nkodlink);
+                }
                 String periodicity = executeSimpleSelectQuery("SELECT ?periodicity WHERE {<" + datasetURI + "> <"+ DCTERMS.ACCRUAL_PERIODICITY + "> ?periodicity }", "periodicity");
                 if (!periodicity.isEmpty()) {
                     root.put("frequency", periodicity);
@@ -388,7 +394,7 @@ public final class DcatAp11ToCkanBatch implements Component, SequentialExecution
                     root.put("spatial_uri", spatial);
                 }
                 LinkedList<String> themes = new LinkedList<>();
-                for (Map<String,Value> map: executeSelectQuery("SELECT ?theme WHERE {<" + datasetURI + "> <"+ DcatAp11ToCkanBatchVocabulary.DCAT_THEME + "> ?theme }")) {
+                for (Map<String,Value> map: executeSelectQuery("SELECT ?theme WHERE {<" + datasetURI + "> <"+ DCAT.THEME + "> ?theme }")) {
                     themes.add(map.get("theme").stringValue());
                 }
                 String concatThemes = "";
@@ -400,7 +406,7 @@ public final class DcatAp11ToCkanBatch implements Component, SequentialExecution
             //Distributions
 
             LinkedList<String> distributions = new LinkedList<>();
-            for (Map<String, Value> map : executeSelectQuery("SELECT ?distribution WHERE {<" + datasetURI + "> <" + DcatAp11ToCkanBatchVocabulary.DCAT_DISTRIBUTION + "> ?distribution }")) {
+            for (Map<String, Value> map : executeSelectQuery("SELECT ?distribution WHERE {<" + datasetURI + "> <" + DCAT.HAS_DISTRIBUTION + "> ?distribution }")) {
                 distributions.add(map.get("distribution").stringValue());
             }
 
@@ -425,8 +431,8 @@ public final class DcatAp11ToCkanBatch implements Component, SequentialExecution
                 }
 
 
-                String dwnld = executeSimpleSelectQuery("SELECT ?dwnld WHERE {<" + distribution + "> <" + DcatAp11ToCkanBatchVocabulary.DCAT_DOWNLOADURL + "> ?dwnld }", "dwnld");
-                String access = executeSimpleSelectQuery("SELECT ?acc WHERE {<" + distribution + "> <" + DcatAp11ToCkanBatchVocabulary.DCAT_ACCESSURL + "> ?acc }", "acc");
+                String dwnld = executeSimpleSelectQuery("SELECT ?dwnld WHERE {<" + distribution + "> <" + DCAT.DOWNLOAD_URL + "> ?dwnld }", "dwnld");
+                String access = executeSimpleSelectQuery("SELECT ?acc WHERE {<" + distribution + "> <" + DCAT.ACCESS_URL + "> ?acc }", "acc");
 
                 //we prefer downloadURL, but only accessURL is mandatory
                 if (dwnld == null || dwnld.isEmpty()) {
@@ -486,7 +492,7 @@ public final class DcatAp11ToCkanBatch implements Component, SequentialExecution
                     if (!dlicense.isEmpty()) {
                         distro.put("license_link", dlicense);
                     }
-                    String dmimetype = executeSimpleSelectQuery("SELECT ?format WHERE {<" + distribution + "> <"+ DcatAp11ToCkanBatchVocabulary.DCAT_MEDIATYPE + "> ?format }", "format");
+                    String dmimetype = executeSimpleSelectQuery("SELECT ?format WHERE {<" + distribution + "> <"+ DCAT.MEDIA_TYPE + "> ?format }", "format");
                     if (!dmimetype.isEmpty()) {
                         distro.put("mimetype", dmimetype.replaceAll(".*\\/([^\\/]+\\/[^\\/]+)","$1"));
                     }
@@ -502,8 +508,12 @@ public final class DcatAp11ToCkanBatch implements Component, SequentialExecution
 
             root.put("resources", resources);
 
-            //Check whether this creates the dataset ok - it is mainly for the output file
-            root.put("owner_org", organizations.get(publisher_uri));
+            if (ckan_organization_id == null || ckan_organization_id.isEmpty()) {
+                //Check whether this creates the dataset ok - it is mainly for the output file
+                root.put("owner_org", organizations.get(publisher_uri));
+            } else { //Overriden
+                root.put("owner_org", ckan_organization_id);
+            }
 
             //Create new dataset
             if (configuration.getToApi() && !datasetExists) {
